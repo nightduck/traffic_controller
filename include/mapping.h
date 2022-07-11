@@ -2,10 +2,10 @@
 #define YELLOW_LIGHT      0x2
 #define GREEN_LIGHT       0x4
 
-#define DNW               0x1
-#define WALK              0x20
-#define DNW_PERP          0x40
-#define WALK_PERP         0x80
+#define DNW_PERP          0x10
+#define WALK_PERP         0x20
+#define DNW               0x40
+#define WALK              0x80
 
 #define NE_CORNER_ADDR    0x20
 #define NW_CORNER_ADDR    0x21

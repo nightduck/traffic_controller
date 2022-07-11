@@ -54,13 +54,40 @@ int enter_state(int ne_led_mask, int nw_led_mask, int sw_led_mask, int se_led_ma
 }
 
 void led_test() {
-  enter_state(RED_LIGHT, RED_LIGHT, RED_LIGHT, RED_LIGHT, 0, 0, 0, 0, 0, 10, 0);
-  enter_state(YELLOW_LIGHT, YELLOW_LIGHT, YELLOW_LIGHT, YELLOW_LIGHT, 0, 0, 0, 0, 0, 10, 0);
-  enter_state(GREEN_LIGHT, GREEN_LIGHT, GREEN_LIGHT, GREEN_LIGHT, 0, 0, 0, 0, 0, 10, 0);
-  enter_state(DNW, DNW, DNW, DNW, 0, 0, 0, 0, 0, 10, 0);
-  enter_state(WALK, WALK, WALK, WALK, 0, 0, 0, 0, 0, 10, 0);
-  enter_state(DNW_PERP, DNW_PERP, DNW_PERP, DNW_PERP, 0, 0, 0, 0, 0, 10, 0);
-  enter_state(WALK_PERP, WALK_PERP, WALK_PERP, WALK_PERP, 0, 0, 0, 0, 0, 10, 0);
+  enter_state(RED_LIGHT, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, RED_LIGHT, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, RED_LIGHT, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, 0, RED_LIGHT, 0, 0, 0, 0, 0, 5, 0);
+
+  enter_state(YELLOW_LIGHT, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, YELLOW_LIGHT, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, YELLOW_LIGHT, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, 0, YELLOW_LIGHT, 0, 0, 0, 0, 0, 5, 0);
+  
+  enter_state(GREEN_LIGHT, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, GREEN_LIGHT, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, GREEN_LIGHT, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, 0, GREEN_LIGHT, 0, 0, 0, 0, 0, 5, 0);
+  
+  enter_state(DNW, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, DNW, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, DNW, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, 0, DNW, 0, 0, 0, 0, 0, 5, 0);
+  
+  enter_state(WALK, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, WALK, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, WALK, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, 0, WALK, 0, 0, 0, 0, 0, 5, 0);
+  
+  enter_state(DNW_PERP, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, DNW_PERP, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, DNW_PERP, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, 0, DNW_PERP, 0, 0, 0, 0, 0, 5, 0);
+  
+  enter_state(WALK_PERP, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, WALK_PERP, 0, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, WALK_PERP, 0, 0, 0, 0, 0, 0, 5, 0);
+  enter_state(0, 0, 0, WALK_PERP, 0, 0, 0, 0, 0, 5, 0);
 }
 
 void basic_loop(int ns_duration, int ew_duration, int ns_yellow_duration, int ew_yellow_duration,
@@ -142,4 +169,9 @@ void setup() {
 void loop() {
   //basic_loop(30, 30, 4, 4, 2, 10);
   led_test();
+  // enter_state(RED_LIGHT | YELLOW_LIGHT | GREEN_LIGHT | DNW | WALK | DNW_PERP | WALK_PERP,
+  // RED_LIGHT | YELLOW_LIGHT | GREEN_LIGHT | DNW | WALK | DNW_PERP | WALK_PERP,
+  // RED_LIGHT | YELLOW_LIGHT | GREEN_LIGHT | DNW | WALK | DNW_PERP | WALK_PERP,
+  // RED_LIGHT | YELLOW_LIGHT | GREEN_LIGHT | DNW | WALK | DNW_PERP | WALK_PERP,
+  // 0, 0, 0, 0, 0, 1, 0);
 }
