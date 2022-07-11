@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../../../git/traffic_controller"
+		},
+		{
+			"name": "traffic_controller",
+			"path": "."
+		}
+	],
+  "settings": {
+    "ros.distro": "foxy"
+  }
+}
