@@ -144,6 +144,7 @@ void basic_loop(int ns_duration, int ew_duration, int ns_yellow_duration, int ew
 void setup() {
   // put your setup code here, to run once:
   Wire.begin();
+  Wire.setClock(1000);
   uint8_t buf[] = {0x00,    // Start at register 0
                    0x00,    // All outputs
                    0x00, 0x00, 0x00, 0x00,
@@ -169,9 +170,6 @@ void setup() {
 void loop() {
   //basic_loop(30, 30, 4, 4, 2, 10);
   led_test();
-  // enter_state(RED_LIGHT | YELLOW_LIGHT | GREEN_LIGHT | DNW | WALK | DNW_PERP | WALK_PERP,
-  // RED_LIGHT | YELLOW_LIGHT | GREEN_LIGHT | DNW | WALK | DNW_PERP | WALK_PERP,
-  // RED_LIGHT | YELLOW_LIGHT | GREEN_LIGHT | DNW | WALK | DNW_PERP | WALK_PERP,
-  // RED_LIGHT | YELLOW_LIGHT | GREEN_LIGHT | DNW | WALK | DNW_PERP | WALK_PERP,
-  // 0, 0, 0, 0, 0, 1, 0);
+  //enter_state(RED_LIGHT, RED_LIGHT, RED_LIGHT, RED_LIGHT,
+  //0, 0, 0, 0, 0, 1, 0);
 }
