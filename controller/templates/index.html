@@ -1,0 +1,212 @@
+<!-- FILEPATH: /home/oren/git/traffic_controller/controller/templates/index.html -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flask Template with Tabbed Views</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Flask Template with Tabbed Views</h2>
+      <ul class="nav nav-tabs">
+        <li class="nav-item">
+          <a class="nav-link active" data-toggle="tab" href="#view1">View 1</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="tab" href="#view2">View 2</a>
+        </li>
+      </ul>
+      <div class="tab-content">
+        <div id="view1" class="tab-pane fade show active">
+          <h3>View 1</h3>
+          <form>
+            <div class="form-group">
+              <label for="multibox">Multibox:</label>
+              <input type="text" class="form-control" id="multibox" placeholder="Enter text">
+            </div>
+            <div class="form-group">
+              <label for="dropdown">Dropdown:</label>
+              <select class="form-control" id="dropdown">
+                <option>Option 1</option>
+                <option>Option 2</option>
+                <option>Option 3</option>
+                <option>Option 4</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="radiogroup">Radio Buttons:</label>
+              <div class="form-check">
+                <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="radiogroup" value="option1" checked>Option 1
+                </label>
+              </div>
+              <div class="form-check">
+                <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="radiogroup" value="option2">Option 2
+                </label>
+              </div>
+              <div class="form-check">
+                <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="radiogroup" value="option3">Option 3
+                </label>
+              </div>
+              <div class="form-check">
+                <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="radiogroup" value="option4">Option 4
+                </label>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="assignLocation()">Assign</button>
+          </form>
+        </div>
+        <div id="view2" class="tab-pane fade">
+          <h3>View 2</h3>
+            <form>
+              <div class="form-group">
+                <label for="intersection">Intersection:</label>
+                <select class="form-control" id="intersection">
+                  <option>Intersection 1</option>
+                  <option>Intersection 2</option>
+                  <option>Intersection 3</option>
+                  <option>Intersection 4</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="green">Green:</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <img src="https://via.placeholder.com/50x50.png?text=Green" alt="Green Light">
+                    </span>
+                  </div>
+                  <input type="number" class="form-control" id="green" placeholder="Enter seconds">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="pedestrian">Pedestrian Blink:</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <img src="https://via.placeholder.com/50x50.png?text=Pedestrian" alt="Pedestrian Blink">
+                    </span>
+                  </div>
+                  <input type="number" class="form-control" id="pedestrian" placeholder="Enter seconds">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="yellow">Yellow:</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <img src="https://via.placeholder.com/50x50.png?text=Yellow" alt="Yellow Light">
+                    </span>
+                  </div>
+                  <input type="number" class="form-control" id="yellow" placeholder="Enter seconds">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="red">Red:</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <img src="https://via.placeholder.com/50x50.png?text=Red" alt="Red Light">
+                    </span>
+                  </div>
+                  <input type="number" class="form-control" id="red" placeholder="Enter seconds">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="green2">Green:</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <img src="https://via.placeholder.com/50x50.png?text=Green" alt="Green Light">
+                    </span>
+                  </div>
+                  <input type="number" class="form-control" id="green2" placeholder="Enter seconds">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="pedestrian2">Pedestrian Blink:</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <img src="https://via.placeholder.com/50x50.png?text=Pedestrian" alt="Pedestrian Blink">
+                    </span>
+                  </div>
+                  <input type="number" class="form-control" id="pedestrian2" placeholder="Enter seconds">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="yellow2">Yellow:</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <img src="https://via.placeholder.com/50x50.png?text=Yellow" alt="Yellow Light">
+                    </span>
+                  </div>
+                  <input type="number" class="form-control" id="yellow2" placeholder="Enter seconds">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="red2">Red:</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <img src="https://via.placeholder.com/50x50.png?text=Red" alt="Red Light">
+                    </span>
+                  </div>
+                  <input type="number" class="form-control" id="red2" placeholder="Enter seconds">
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="setLightTiming()">Submit</button>
+            </form>
+          </div>
+        </div>
+        <script>
+          function setLightTiming() {
+            var intersection = document.getElementById("intersection").value;
+            var green = document.getElementById("green").value;
+            var pedestrian = document.getElementById("pedestrian").value;
+            var yellow = document.getElementById("yellow").value;
+            var red = document.getElementById("red").value;
+            var green2 = document.getElementById("green2").value;
+            var pedestrian2 = document.getElementById("pedestrian2").value;
+            var yellow2 = document.getElementById("yellow2").value;
+            var red2 = document.getElementById("red2").value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/setLightTiming", true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+              intersection: intersection,
+              green: green,
+              pedestrian: pedestrian,
+              yellow: yellow,
+              red: red,
+              green2: green2,
+              pedestrian2: pedestrian2,
+              yellow2: yellow2,
+              red2: red2
+            }));
+            function assignLocation() {
+              var multibox = document.getElementById("multibox").value;
+              var dropdown = document.getElementById("dropdown").value;
+              var radiogroup = document.querySelector('input[name="radiogroup"]:checked').value;
+              var xhr = new XMLHttpRequest();
+              xhr.open("POST", "/setLightLocation", true);
+              xhr.setRequestHeader('Content-Type', 'application/json');
+              xhr.send(JSON.stringify({
+                multibox: multibox,
+                dropdown: dropdown,
+                radiogroup: radiogroup
+              }));
+          }
+        </script>
+      </body>
+    </html>
