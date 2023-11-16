@@ -37,6 +37,8 @@ void set_traffic_light(int addr, int state) {
   Wire.write(OUTPUT_REGISTER);
   Wire.write(state);
   Wire.endTransmission();
+
+  Serial.println(state);
 }
 
 // int enter_state(int led_mask, int blink_mask, int blink_duration, int state_duration, int interrupt_mask) {
@@ -121,6 +123,7 @@ int enter_state(int state, int duration, int interrupt_mask) {
       led_mask ^= blink_mask;
       set_traffic_light(NE_CORNER_ADDR, led_mask);
     }
+  }
 }
 
 void led_test() {
@@ -172,6 +175,8 @@ void setup() {
       EEPROM.writeString(1, uuid);
       EEPROM.commit();
     }
+
+    Serial.println(uuid);
 }
 
 void loop() {

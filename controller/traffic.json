@@ -1,0 +1,30 @@
+{
+	"time" : 1234,
+	"intersections" :
+		[
+			{
+				"name" : "2nd and Broadway",
+				"id" : 0,  // Must match index in array
+				"north_light" : "...uuid...",
+				"south_light" : "...uuid...",
+				"east_light" : "...uuid...",
+				"west_light" : "...uuid...",
+				"ns_green_ms" : 30000,
+				"ew_green_ms" : 30000,
+				"ns_yellow_ms" : 4000,
+				"ew_yellow_ms" : 4000,
+				"all_red_ms" : 2000,
+				"pedestrian_ms" : 10000
+			}
+		],
+	"lights" : 
+        {
+		"...uuid..." :
+			{
+				"intersection_id": 0,
+				"position" : "north_light",
+				"state" : 0,
+				"remaining_ms" : 4600
+			}
+        }
+}

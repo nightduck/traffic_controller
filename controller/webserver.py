@@ -2,6 +2,7 @@
 
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
 import uuid
+import json
 
 app = Flask(__name__)
 
@@ -32,16 +33,16 @@ def index():
     return 'Hello, World!'
     # TODO: Write main interface page
 
-# REST call to get unique light ID
-# Returns 500 if error accessing database
-@app.route('/getLightID', methods=['GET'])
-def getLightID():
-    # Generate new ID every time
-    id = uuid.uuid4()
+# # REST call to get unique light ID
+# # Returns 500 if error accessing database
+# @app.route('/getLightID', methods=['GET'])
+# def getLightID():
+#     # Generate new ID every time
+#     id = uuid.uuid4()
     
-    # TODO: Store ID in database
+#     # TODO: Store ID in database
     
-    return str(id)
+#     return str(id)
 
 # REST call to get list of all IDs
 # Returns 500 if error accessing database
@@ -62,6 +63,8 @@ def getLightStateAll():
     # TODO: Update state given timing information and time passed
     # TODO: Return simplified json with just state information
     
+    # TODO: Calculate current state of all uuids and return list of json objects
+    
     return 501
 
 # REST call to get light state for specified ID
@@ -72,14 +75,48 @@ def getLightState(id):
     # TODO: Update state given timing information and time passed
     # TODO: Return simplified json with just state information, filtered by ID
     
-    return 501
+    # Temp:
+    # TODO: Calculate current state of uuid and return json object with info
+    intersection = None
+    traffic = None
+    with open("traffic.json", "r") as json_file:
+        traffic = json.load(json_file)
+        intersection_id = traffic["lights"][id]["intersection_id"]
+        intersection = traffic["intersections"][intersection_id]
+        
+    state_durations = [intersection["ns_green_ms"] - intersection["pedestrian_ms"], intersection["pedestrian_ms"], intersection["ns_yellow_ms"], intersection["all_red_ms"],
+                       intersection["ew_green_ms"] - intersection["pedestrian_ms"], intersection["pedestrian_ms"], intersection["ew_yellow_ms"], intersection["all_red_ms"]]
+    
+    for i in range(1, len(state_durations)):
+        state_durations[i] += state_durations[i-1]
+        
+    time = traffic["time"] % state_durations[-1]
+    
+    state = 0
+    while time < state_durations[i]:
+        state += 1
+        
+    if intersection["north_light"] == id or intersection["south_light"] == id:
+        # TODO: Code logic to build light state object
+        if state == 7:
+            state = 6
+    elif intersection["east_light"] == id or intersection["west_light"] == id:
+        # TODO: Code logic to build light state object
+        state += 4
+        if state == 7:
+            state = 6
+    else:
+        return ERROR_NOT_FOUND
+    
+    return jsonify({id: {"intersection_id": intersection_id, "state" : state, "remaining_ms": state_durations[state] - time}})
 
-# REST call to provide intersection and direction of light given ID
-# Returns 401 if ID not found in database
-# Returns 404 if ID not assigned to location
-@app.route('/getLightLocation/<uuid>', methods=['GET'])
-def getLightLocation(id):
-    return 501
+
+# # REST call to provide intersection and direction of light given ID
+# # Returns 401 if ID not found in database
+# # Returns 404 if ID not assigned to location
+# @app.route('/getLightLocation/<uuid>', methods=['GET'])
+# def getLightLocation(id):
+#     return 501
 
 # REST call to assign light ID to intersection
 # Returns 401 if ID not found in database
