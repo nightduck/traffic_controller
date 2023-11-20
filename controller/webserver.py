@@ -1,6 +1,6 @@
 # Flask app for web interface and REST api
 
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, Response
 import uuid
 import json
 
@@ -48,12 +48,12 @@ def index():
 # Returns 500 if error accessing database
 @app.route('/getLightIDs', methods=['GET'])
 def getLightIDs():
-    return 501
+    return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
 
 # REST call to remove ID from database
 @app.route('/removeLightID', methods=['POST'])
 def removeLightID():
-    return 501
+    return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
 
 # REST call to get light state for all intersections
 # Returns 500 if error accessing database
@@ -65,12 +65,12 @@ def getLightStateAll():
     
     # TODO: Calculate current state of all uuids and return list of json objects
     
-    return 501
+    return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
 
 # REST call to get light state for specified ID
 # Returns 401 if ID not found in database
 @app.route('/getLightState/<uuid>', methods=['GET'])
-def getLightState(id):
+def getLightState(uuid):
     # TODO: Get light state from database
     # TODO: Update state given timing information and time passed
     # TODO: Return simplified json with just state information, filtered by ID
@@ -81,7 +81,7 @@ def getLightState(id):
     traffic = None
     with open("traffic.json", "r") as json_file:
         traffic = json.load(json_file)
-        intersection_id = traffic["lights"][id]["intersection_id"]
+        intersection_id = traffic["lights"][uuid]["intersection_id"]
         intersection = traffic["intersections"][intersection_id]
         
     state_durations = [intersection["ns_green_ms"] - intersection["pedestrian_ms"], intersection["pedestrian_ms"], intersection["ns_yellow_ms"], intersection["all_red_ms"],
@@ -93,22 +93,29 @@ def getLightState(id):
     time = traffic["time"] % state_durations[-1]
     
     state = 0
-    while time < state_durations[i]:
+    while time >= state_durations[state]:
         state += 1
         
-    if intersection["north_light"] == id or intersection["south_light"] == id:
-        # TODO: Code logic to build light state object
-        if state == 7:
-            state = 6
-    elif intersection["east_light"] == id or intersection["west_light"] == id:
-        # TODO: Code logic to build light state object
-        state += 4
-        if state == 7:
-            state = 6
+    if intersection["north_light"] == uuid:
+        position = "north_light"
+        reported_state = state
+    elif intersection["south_light"] == uuid:
+        position = "south_light"
+        reported_state = state
+    elif intersection["east_light"] == uuid:
+        position = "east_light"
+        reported_state = (state + 4) % 8
+    elif intersection["west_light"] == uuid:
+        position = "west_light"
+        reported_state = (state + 4) % 8
     else:
-        return ERROR_NOT_FOUND
+        return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
+      
+    if reported_state == 7:
+      reported_state = 6
     
-    return jsonify({id: {"intersection_id": intersection_id, "state" : state, "remaining_ms": state_durations[state] - time}})
+    return jsonify({uuid: {"intersection_id": intersection_id, "position" : position, "state" : reported_state, "remaining_ms": state_durations[state] - time}})
+    #return Response(result, status=STATUS_OK, mimetype='application/json')
 
 
 # # REST call to provide intersection and direction of light given ID
@@ -122,12 +129,12 @@ def getLightState(id):
 # Returns 401 if ID not found in database
 @app.route('/setLightLocation/<uuid>', methods=['POST'])
 def setLightLocation(id):
-    return 501
+    return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
 
 # REST call to set timing information for intersection
 @app.route('/setLightTiming/', methods=['POST'])
 def setLightTiming():
-    return 501
+    return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
 
 if __name__ == '__main__':
     app.run(debug=True)
