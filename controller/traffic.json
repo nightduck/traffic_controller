@@ -1,5 +1,4 @@
 {
-	"time" : 0,
 	"intersections" :
 		[
 			{
@@ -14,7 +13,8 @@
 				"ns_yellow_ms" : 4000,
 				"ew_yellow_ms" : 4000,
 				"all_red_ms" : 2000,
-				"pedestrian_ms" : 10000
+				"pedestrian_ms" : 10000,
+        "timing_offset_ms" : 0
 			}
 		],
   "light_map" :

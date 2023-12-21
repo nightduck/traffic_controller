@@ -95,10 +95,7 @@ def getLightState(uuid):
     for i in range(1, len(state_durations)):
         state_durations[i] += state_durations[i-1]
         
-    time_since_start = monotonic() - traffic["start_time"]
-    if time_since_start < 0:
-        return Response("Invalid timestamp", status=ERROR_SERVER)
-    time = time_since_start * 1000 % state_durations[-1]
+    time = (monotonic() * 1000 - intersection["timing_offset_ms"]) % state_durations[-1]
     
     state = 0
     while time >= state_durations[state]:
@@ -145,9 +142,4 @@ def setLightTiming():
     return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
 
 if __name__ == '__main__':
-    with open("traffic.json", "r") as json_file:
-        traffic = json.load(json_file, encoding="utf-8")
-        traffic["start_time"] = monotonic()
-    with open("traffic.json", "w") as json_file:
-        json.dump(traffic, json_file, indent=4)
     app.run(host='0.0.0.0', port=5000)
