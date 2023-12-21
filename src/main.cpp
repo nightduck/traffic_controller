@@ -226,13 +226,13 @@ void loop() {
         int remaining_ms = doc[uuid]["remaining_ms"].as<int>();
         int blink_duration = doc[uuid]["blink_duration"].as<int>();
         // int interrupt_mask = doc["interrupt_mask"].as<int>();
+        Serial.println("State: " + String(state) + " Remaining: " + String(remaining_ms) + " Blink: " + String(blink_duration));
         int interrupt_state = enter_state(state, remaining_ms, 0);
         // if (interrupt_state & interrupt_mask) {
         //     http.begin(SERVER + "setLightState/" + uuid + "/" + interrupt_state);
         //     http.GET();
         // }
-        Serial.println("State: " + String(state) + " Remaining: " + String(remaining_ms) + " Blink: " + String(blink_duration));
-        enter_state(state, remaining_ms, 0);
+        // enter_state(state, remaining_ms, 0);
     } else if (httpCode == 401) {
         // If the server returns 401, the light is not registered. Do nothing
         // uuid = "";

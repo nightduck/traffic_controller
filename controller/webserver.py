@@ -3,10 +3,12 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, Response
 import uuid
 import json
+from time import monotonic
 
 app = Flask(__name__)
 
 ERROR_NOT_IMPLEMENTED = 501
+ERROR_SERVER = 500
 ERROR_UNKNOWN_ID = 401      # ID not found in database, must request new ID with /getLightID
 ERROR_NOT_FOUND = 404
 STATUS_OK = 200
@@ -69,6 +71,7 @@ def getLightStateAll():
 
 # REST call to get light state for specified ID
 # Returns 401 if ID not found in database
+# Returns 500 if timestamp is invalid
 @app.route('/getLightState/<uuid>', methods=['GET'])
 def getLightState(uuid):
     # TODO: Get light state from database
@@ -92,7 +95,10 @@ def getLightState(uuid):
     for i in range(1, len(state_durations)):
         state_durations[i] += state_durations[i-1]
         
-    time = traffic["time"] % state_durations[-1]
+    time_since_start = monotonic() - traffic["start_time"]
+    if time_since_start < 0:
+        return Response("Invalid timestamp", status=ERROR_SERVER)
+    time = time_since_start * 1000 % state_durations[-1]
     
     state = 0
     while time >= state_durations[state]:
@@ -139,4 +145,9 @@ def setLightTiming():
     return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
 
 if __name__ == '__main__':
+    with open("traffic.json", "r") as json_file:
+        traffic = json.load(json_file, encoding="utf-8")
+        traffic["start_time"] = monotonic()
+    with open("traffic.json", "w") as json_file:
+        json.dump(traffic, json_file, indent=4)
     app.run(host='0.0.0.0', port=5000)
