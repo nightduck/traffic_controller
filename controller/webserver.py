@@ -80,8 +80,10 @@ def getLightState(uuid):
     intersection = None
     traffic = None
     with open("traffic.json", "r") as json_file:
-        traffic = json.load(json_file)
-        intersection_id = traffic["lights"][uuid]["intersection_id"]
+        traffic = json.load(json_file, encoding="utf-8")
+        if uuid not in traffic["light_map"]:
+            return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
+        intersection_id = traffic["light_map"][uuid]
         intersection = traffic["intersections"][intersection_id]
         
     state_durations = [intersection["ns_green_ms"] - intersection["pedestrian_ms"], intersection["pedestrian_ms"], intersection["ns_yellow_ms"], intersection["all_red_ms"],
@@ -137,4 +139,4 @@ def setLightTiming():
     return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
