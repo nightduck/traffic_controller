@@ -4,11 +4,11 @@
 		[
 			{
 				"name" : "2nd and Broadway",
-				"id" : 0,  // Must match index in array
-				"north_light" : "4a1ec166-07b0-4698-88a3-1a4814886e24",
+				"north_light" : "7cb4ac4e-d038-143f-74bc-efddbbeb505f",
 				"south_light" : "69db8b7f-d923-4b2a-9f9d-68a9f67c6e74",
 				"east_light" : "dd2531ca-6a64-4eb2-8308-202fa9c042a9",
 				"west_light" : "1d2dff07-fa6d-456f-8047-4e31c72c3907",
+				"id" : 0,
 				"ns_green_ms" : 30000,
 				"ew_green_ms" : 30000,
 				"ns_yellow_ms" : 4000,
@@ -17,25 +17,25 @@
 				"pedestrian_ms" : 10000
 			}
 		],
-    "lights" :
+  "lights" :
     {
-      "4a1ec166-07b0-4698-88a3-1a4814886e24" :
+      "769441bb-5e22-5493-ed79-6c6d33a056b8" :
       {
-        "id" : "4a1ec166-07b0-4698-88a3-1a4814886e24",
+        "id" : "769441bb-5e22-5493-ed79-6c6d33a056b8",
         "intersection_id" : 0,
         "state" : 1,
         "time_remaining" : 10000
       },
-      "69db8b7f-d923-4b2a-9f9d-68a9f67c6e74" :
+      "6542a3c3-9c51-f7bf-5436-5cda89d54c03" :
       {
-        "id" : "69db8b7f-d923-4b2a-9f9d-68a9f67c6e74",
+        "id" : "6542a3c3-9c51-f7bf-5436-5cda89d54c03",
         "intersection_id" : 0,
         "state" : 1,
         "time_remaining" : 10000
       },
-      "dd2531ca-6a64-4eb2-8308-202fa9c042a9" :
+      "2b54847f-cca6-c574-1529-57bbf930e326" :
       {
-        "id" : "dd2531ca-6a64-4eb2-8308-202fa9c042a9",
+        "id" : "2b54847f-cca6-c574-1529-57bbf930e326",
         "intersection_id" : 0,
         "state" : 5,
         "time_remaining" : 10000

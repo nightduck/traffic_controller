@@ -11,11 +11,13 @@
 
 #include "mapping.h"
 
-#define SSID "ssid"
-#define PASSWORD "password"
-#define SERVER "http://192.168.0.1/"
+#define SSID "NETGEAR84"
+#define PASSWORD "noodlesfreak492meout"
+#define SERVER "http://192.168.0.13:5000/"
 
 #define EEPROM_SIZE 512
+
+//#define FACTORY_RESET
 
 String uuid = "";
 int intersection_id = -1;
@@ -76,7 +78,8 @@ void set_traffic_light(int addr, int state) {
 //     return interrupt_state;
 // }
 
-int enter_state(int state, int duration, int interrupt_mask) {
+int enter_state(int state, int duration_ms, int interrupt_mask) {
+  Serial.println("Entering state " + String(state) + " for " + String(duration_ms) + "ms");
   int led_mask, blink_mask, time = 0, interrupt_state = 0;
   switch(state) {
     case 0:
@@ -115,7 +118,7 @@ int enter_state(int state, int duration, int interrupt_mask) {
 
   set_traffic_light(NE_CORNER_ADDR, led_mask);
 
-  while(time < duration && !(interrupt_state & interrupt_mask)) {
+  while(time < duration_ms && !(interrupt_state & interrupt_mask)) {
     delay(100);
     time+=100;
 
@@ -124,17 +127,20 @@ int enter_state(int state, int duration, int interrupt_mask) {
       set_traffic_light(NE_CORNER_ADDR, led_mask);
     }
   }
+
+  return interrupt_state;
 }
 
-void led_test() {
-    enter_state(RED_LIGHT, 0, 0, 5, 0);
-    enter_state(YELLOW_LIGHT, 0, 0, 5, 0);
-    enter_state(GREEN_LIGHT, 0, 0, 5, 0);
-    enter_state(DNW, 0, 0, 5, 0);
-    enter_state(WALK, 0, 0, 5, 0);
-    enter_state(DNW_PERP, 0, 0, 5, 0);
-    enter_state(WALK_PERP, 0, 0, 5, 0);
-}
+// Defunct due to API change
+// void led_test() {
+//     enter_state(RED_LIGHT, 5, 0);
+//     enter_state(YELLOW_LIGHT, 5, 0);
+//     enter_state(GREEN_LIGHT, 5, 0);
+//     enter_state(DNW, 5, 0);
+//     enter_state(WALK, 5, 0);
+//     enter_state(DNW_PERP, 5, 0);
+//     enter_state(WALK_PERP, 5, 0);
+// }
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -164,15 +170,37 @@ void setup() {
     EEPROM.begin(EEPROM_SIZE);
     
     // If fresh device, generate a uuid
+    #ifndef FACTORY_RESET
     if (EEPROM.read(0) == 0x01) {
-      uuid = EEPROM.readString(1, 36);
-    } else {
+      Serial.println("Reading UUID");
+      char c;
+      int i = 1;
+      while ((c = EEPROM.read(i++)) != 0) {
+        uuid += c;
+      }
+    } else
+    #endif
+    {
+      Serial.println("Generating UUID");
       uuid = "";
-      for (int i = 0; i < 36; i++) {
+      for (int i = 0; i < 8; i++) {
+        uuid += String(random(16), HEX);
+      }
+      uuid += "-";
+      for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
+          uuid += String(random(16), HEX);
+        }
+        uuid += "-";
+      }
+      for (int i = 0; i < 12; i++) {
         uuid += String(random(16), HEX);
       }
       EEPROM.write(0, 0x01);
-      EEPROM.writeString(1, uuid);
+      for (int i = 0; i < uuid.length(); i++) {
+        EEPROM.write(i + 1, uuid[i]);
+      }
+      EEPROM.write(uuid.length() + 1, 0x00);
       EEPROM.commit();
     }
 
@@ -180,12 +208,14 @@ void setup() {
 }
 
 void loop() {
-    led_test();
+    // led_test();
 
     // If uuid and location are known, get the state from the server at /getLightState/<uuid>
     HTTPClient http;
-    http.begin(SERVER + "getLightState/" + uuid);
+    WiFiClient wifi;
+    http.begin(wifi, String(SERVER) + "getLightState/" + uuid);
     int httpCode = http.GET();
+    Serial.println("Got code" + String(httpCode));
     if (httpCode == 200) {
         String payload = http.getString();
         Serial.println(payload);
@@ -200,10 +230,15 @@ void loop() {
         //     http.begin(SERVER + "setLightState/" + uuid + "/" + interrupt_state);
         //     http.GET();
         // }
+        Serial.println("State: " + String(state) + " Remaining: " + String(remaining_ms) + " Blink: " + String(blink_duration));
+        enter_state(state, remaining_ms, 0);
     } else if (httpCode == 401) {
         // If the server returns 401, the light is not registered. Do nothing
-        uuid = "";
+        // uuid = "";
         intersection_id = -1;
         intersection_location = "";
+        delay(1000);
+    } else {
+      delay(1000);
     }
 }
