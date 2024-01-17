@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 import uuid
 import json
 from time import monotonic
+import os
 
 app = Flask(__name__)
 
@@ -32,8 +33,7 @@ class Intersection:
 
 @app.route('/')
 def index():
-    return 'Hello, World!'
-    # TODO: Write main interface page
+    return render_template('index.html')
 
 # # REST call to get unique light ID
 # # Returns 500 if error accessing database
@@ -48,9 +48,22 @@ def index():
 
 # REST call to get list of all IDs
 # Returns 500 if error accessing database
+# If successful, returns json object witth lists of format:
+# unassigned: [ <uuid>, ... ],
+# assigned: [ <uuid>, ... ]
 @app.route('/getLightIDs', methods=['GET'])
 def getLightIDs():
-    return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
+  unassigned = []
+  assigned = []
+  with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
+      traffic = json.load(json_file)
+      for uuid in traffic["light_map"]:
+          if traffic["light_map"][uuid]["intersection_id"] == -1:
+              unassigned.append(uuid)
+          else:
+              assigned.append(uuid)
+      
+  return jsonify({"unassigned": unassigned, "assigned": assigned})
 
 # REST call to remove ID from database
 @app.route('/removeLightID', methods=['POST'])
@@ -72,6 +85,14 @@ def getLightStateAll():
 # REST call to get light state for specified ID
 # Returns 401 if ID not found in database
 # Returns 500 if timestamp is invalid
+# If valid, returns json object with state information of format:
+# uuid: {
+#   id: <uuid>,
+#   intersection_id: <intersection_id>,
+#   direction: <position>,
+#   state: <state>,
+#   remaining_ms: <remaining_ms>
+# }
 @app.route('/getLightState/<uuid>', methods=['GET'])
 def getLightState(uuid):
     # TODO: Get light state from database
@@ -82,11 +103,13 @@ def getLightState(uuid):
     # TODO: Calculate current state of uuid and return json object with info
     intersection = None
     traffic = None
-    with open("traffic.json", "r") as json_file:
-        traffic = json.load(json_file, encoding="utf-8")
+    with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
+        traffic = json.load(json_file)
         if uuid not in traffic["light_map"]:
             return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
-        intersection_id = traffic["light_map"][uuid]
+        if traffic["light_map"][uuid]["state"] == -1: # If light is in error state, return json object as-is
+            return jsonify(traffic["light_map"][uuid])
+        intersection_id = traffic["light_map"][uuid]["intersection_id"]
         intersection = traffic["intersections"][intersection_id]
         
     state_durations = [intersection["ns_green_ms"] - intersection["pedestrian_ms"], intersection["pedestrian_ms"], intersection["ns_yellow_ms"], intersection["all_red_ms"],
@@ -119,7 +142,7 @@ def getLightState(uuid):
     if reported_state == 7:
       reported_state = 6
     
-    return jsonify({uuid: {"intersection_id": intersection_id, "position" : position, "state" : reported_state, "remaining_ms": state_durations[state] - time}})
+    return jsonify({uuid: {"id": uuid, "intersection_id": intersection_id, "direction" : position, "state" : reported_state, "remaining_ms": state_durations[state] - time}})
     #return Response(result, status=STATUS_OK, mimetype='application/json')
 
 

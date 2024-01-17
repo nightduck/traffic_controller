@@ -19,9 +19,45 @@
 		],
   "light_map" :
     {
-      "769441bb-5e22-5493-ed79-6c6d33a056b8" : 0,
-      "6542a3c3-9c51-f7bf-5436-5cda89d54c03" : 0,
-      "2b54847f-cca6-c574-1529-57bbf930e326" : 0,
-      "1d2dff07-fa6d-456f-8047-4e31c72c3907" : 0
+      "7cb4ac4e-d038-143f-74bc-efddbbeb505f" : 
+      {
+        "id" : "769441bb-5e22-5493-ed79-6c6d33a056b8",
+        "intersection_id" : 0,
+        "direction" : "north_light",
+        "state" : 0,
+        "remaining_ms" : 5000
+      },
+      "6542a3c3-9c51-f7bf-5436-5cda89d54c03" : 
+      {
+        "id" : "6542a3c3-9c51-f7bf-5436-5cda89d54c03",
+        "intersection_id" : 0,
+        "direction" : "south_light",
+        "state" : -1,
+        "remaining_ms" : 5000
+      },
+      "2b54847f-cca6-c574-1529-57bbf930e326" :
+      {
+        "id" : "2b54847f-cca6-c574-1529-57bbf930e326",
+        "intersection_id" : 0,
+        "direction" : "east_light",
+        "state" : 0,
+        "remaining_ms" : 5000
+      },
+      "1d2dff07-fa6d-456f-8047-4e31c72c3907" : 
+      {
+        "id" : "1d2dff07-fa6d-456f-8047-4e31c72c3907",
+        "intersection_id" : 0,
+        "direction" : "west_light",
+        "state" : 0,
+        "remaining_ms" : 5000
+      },
+      "769441bb-5e22-5493-ed79-6c6d33a056b8" : 
+      {
+        "id" : "769441bb-5e22-5493-ed79-6c6d33a056b8",
+        "intersection_id" : -1,
+        "direction" : "",
+        "state" : -1,
+        "remaining_ms" : 5000
+      }
     }
 }

@@ -10,10 +10,18 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+      select {
+        height: 300px;
+        line-height: 50px;
+        -webkit-appearance: menulist-button;  
+        -moz-appearance:none;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
-      <h2>Flask Template with Tabbed Views</h2>
+      <h2>Traffic Control Center</h2>
       <ul class="nav nav-tabs">
         <li class="nav-item">
           <a class="nav-link active" data-toggle="tab" href="#view1">View 1</a>
@@ -24,45 +32,43 @@
       </ul>
       <div class="tab-content">
         <div id="view1" class="tab-pane fade show active">
-          <h3>View 1</h3>
+          <h3></h3>
           <form>
             <div class="form-group">
-              <label for="multibox">Multibox:</label>
-              <input type="text" class="form-control" id="multibox" placeholder="Enter text">
-            </div>
-            <div class="form-group">
-              <label for="dropdown">Dropdown:</label>
-              <select class="form-control" id="dropdown">
-                <option>Option 1</option>
-                <option>Option 2</option>
-                <option>Option 3</option>
-                <option>Option 4</option>
+              <label for="controller-select">Traffic Controllers:</label>
+              <select multiple class="form-control" id="controller-select">
+                <optgroup label="Unassigned Controllers" id="unassigned">
+                </optgroup>
+                <optgroup label="Assigned Controllers" id="assigned">
+                </optgroup>
               </select>
+              <p align="right">
+              <button type="button" class="btn btn-primary" onclick="identifyController()">Identify</button>
+              <button type="button" class="btn btn-primary" onclick="refreshUUIDs()">Refresh</button>
+              </p>
             </div>
             <div class="form-group">
-              <label for="radiogroup">Radio Buttons:</label>
-              <div class="form-check">
-                <label class="form-check-label">
-                  <input type="radio" class="form-check-input" name="radiogroup" value="option1" checked>Option 1
-                </label>
-              </div>
-              <div class="form-check">
-                <label class="form-check-label">
-                  <input type="radio" class="form-check-input" name="radiogroup" value="option2">Option 2
-                </label>
-              </div>
-              <div class="form-check">
-                <label class="form-check-label">
-                  <input type="radio" class="form-check-input" name="radiogroup" value="option3">Option 3
-                </label>
-              </div>
-              <div class="form-check">
-                <label class="form-check-label">
-                  <input type="radio" class="form-check-input" name="radiogroup" value="option4">Option 4
-                </label>
+              <label for="intersection-select">Intersection:</label>
+              <select class="form-control" id="intersection-select">
+                <option>Intersection 1</option>
+                <option>Intersection 2</option>
+                <option>Intersection 3</option>
+                <option>Intersection 4</option>
+              </select>
+              <label for="radiogroup">Side of Intersection:</label>
+              <div class="location-select">
+                <input type="radio" id="north" name="radiogroup" value="north">
+                <label for="north">North</label><br>
+                <input type="radio" id="south" name="radiogroup" value="south">
+                <label for="south">South</label><br>
+                <input type="radio" id="east" name="radiogroup" value="east">
+                <label for="east">East</label><br>
+                <input type="radio" id="west" name="radiogroup" value="west">
+                <label for="west">West</label><br>
               </div>
             </div>
             <button type="button" class="btn btn-primary" onclick="assignLocation()">Assign</button>
+            <p class="text-toast"></p>
           </form>
         </div>
         <div id="view2" class="tab-pane fade">
@@ -85,7 +91,7 @@
                       <img src="https://via.placeholder.com/50x50.png?text=Green" alt="Green Light">
                     </span>
                   </div>
-                  <input type="number" class="form-control" id="green" placeholder="Enter seconds">
+                  <input type="number" class="form-control" id="green" placeholder="Enter seconds" style="margin: 5px;">
                 </div>
               </div>
               <div class="form-group">
@@ -96,7 +102,7 @@
                       <img src="https://via.placeholder.com/50x50.png?text=Pedestrian" alt="Pedestrian Blink">
                     </span>
                   </div>
-                  <input type="number" class="form-control" id="pedestrian" placeholder="Enter seconds">
+                  <input type="number" class="form-control" id="pedestrian" placeholder="Enter seconds" style="margin: 5px;">
                 </div>
               </div>
               <div class="form-group">
@@ -107,7 +113,7 @@
                       <img src="https://via.placeholder.com/50x50.png?text=Yellow" alt="Yellow Light">
                     </span>
                   </div>
-                  <input type="number" class="form-control" id="yellow" placeholder="Enter seconds">
+                  <input type="number" class="form-control" id="yellow" placeholder="Enter seconds" style="margin: 5px;">
                 </div>
               </div>
               <div class="form-group">
@@ -118,7 +124,7 @@
                       <img src="https://via.placeholder.com/50x50.png?text=Red" alt="Red Light">
                     </span>
                   </div>
-                  <input type="number" class="form-control" id="red" placeholder="Enter seconds">
+                  <input type="number" class="form-control" id="red" placeholder="Enter seconds" style="margin: 5px;">
                 </div>
               </div>
               <div class="form-group">
@@ -129,7 +135,7 @@
                       <img src="https://via.placeholder.com/50x50.png?text=Green" alt="Green Light">
                     </span>
                   </div>
-                  <input type="number" class="form-control" id="green2" placeholder="Enter seconds">
+                  <input type="number" class="form-control" id="green2" placeholder="Enter seconds" style="margin: 5px;">
                 </div>
               </div>
               <div class="form-group">
@@ -140,7 +146,7 @@
                       <img src="https://via.placeholder.com/50x50.png?text=Pedestrian" alt="Pedestrian Blink">
                     </span>
                   </div>
-                  <input type="number" class="form-control" id="pedestrian2" placeholder="Enter seconds">
+                  <input type="number" class="form-control" id="pedestrian2" placeholder="Enter seconds" style="margin: 5px;">
                 </div>
               </div>
               <div class="form-group">
@@ -151,7 +157,7 @@
                       <img src="https://via.placeholder.com/50x50.png?text=Yellow" alt="Yellow Light">
                     </span>
                   </div>
-                  <input type="number" class="form-control" id="yellow2" placeholder="Enter seconds">
+                  <input type="number" class="form-control" id="yellow2" placeholder="Enter seconds" style="margin: 5px;">
                 </div>
               </div>
               <div class="form-group">
@@ -162,7 +168,7 @@
                       <img src="https://via.placeholder.com/50x50.png?text=Red" alt="Red Light">
                     </span>
                   </div>
-                  <input type="number" class="form-control" id="red2" placeholder="Enter seconds">
+                  <input type="number" class="form-control" id="red2" placeholder="Enter seconds" style="margin: 5px;">
                 </div>
               </div>
               <button type="button" class="btn btn-primary" onclick="setLightTiming()">Submit</button>
@@ -194,19 +200,46 @@
               yellow2: yellow2,
               red2: red2
             }));
-            function assignLocation() {
-              var multibox = document.getElementById("multibox").value;
-              var dropdown = document.getElementById("dropdown").value;
-              var radiogroup = document.querySelector('input[name="radiogroup"]:checked').value;
-              var xhr = new XMLHttpRequest();
-              xhr.open("POST", "/setLightLocation", true);
-              xhr.setRequestHeader('Content-Type', 'application/json');
-              xhr.send(JSON.stringify({
-                multibox: multibox,
-                dropdown: dropdown,
-                radiogroup: radiogroup
-              }));
-          }
+          };
+          function assignLocation() {
+            var multibox = document.getElementById("multibox").value;
+            var dropdown = document.getElementById("dropdown").value;
+            var radiogroup = document.querySelector('input[name="radiogroup"]:checked').value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/setLightLocation", true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+              multibox: multibox,
+              dropdown: dropdown,
+              radiogroup: radiogroup
+            }));
+          };
+          function refreshUUIDs() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/getLightIDs", true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send();
+            xhr.responseType = 'json';
+            xhr.onload = function() {
+              var unassigned = document.querySelector('#controller-select > #unassigned');
+              var assigned = document.querySelector('#controller-select > #assigned');
+              var assigned_ids = xhr.response["assigned"];
+              var unassigned_ids = xhr.response["unassigned"];
+              unassigned.innerHTML = "";
+              assigned.innerHTML = "";
+              for (var i = 0; i < assigned_ids.length; i++) {
+                var option = document.createElement("option");
+                option.text = assigned_ids[i];
+                assigned.appendChild(option);
+              }
+              for (var i = 0; i < unassigned_ids.length; i++) {
+                var option = document.createElement("option");
+                option.text = unassigned_ids[i];
+                unassigned.appendChild(option);
+              }
+            }
+          };
+          refreshUUIDs();
         </script>
       </body>
     </html>

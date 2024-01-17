@@ -11,9 +11,9 @@
 
 #include "mapping.h"
 
-#define SSID "NETGEAR84"
-#define PASSWORD "noodlesfreak492meout"
-#define SERVER "http://192.168.0.13:5000/"
+#define SSID "MiniCity"
+#define PASSWORD "mckelvey"
+#define SERVER "http://10.42.0.1:5000/"
 
 #define EEPROM_SIZE 512
 
