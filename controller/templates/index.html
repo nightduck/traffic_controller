@@ -36,7 +36,7 @@
           <form>
             <div class="form-group">
               <label for="controller-select">Traffic Controllers:</label>
-              <select multiple class="form-control" id="controller-select">
+              <select class="form-control" id="controller-select" size=10>
                 <optgroup label="Unassigned Controllers" id="unassigned">
                 </optgroup>
                 <optgroup label="Assigned Controllers" id="assigned">
@@ -50,13 +50,9 @@
             <div class="form-group">
               <label for="intersection-select">Intersection:</label>
               <select class="form-control" id="intersection-select">
-                <option>Intersection 1</option>
-                <option>Intersection 2</option>
-                <option>Intersection 3</option>
-                <option>Intersection 4</option>
               </select>
               <label for="radiogroup">Side of Intersection:</label>
-              <div class="location-select">
+              <div class="location-select" disabled>
                 <input type="radio" id="north" name="radiogroup" value="north">
                 <label for="north">North</label><br>
                 <input type="radio" id="south" name="radiogroup" value="south">
@@ -65,6 +61,7 @@
                 <label for="east">East</label><br>
                 <input type="radio" id="west" name="radiogroup" value="west">
                 <label for="west">West</label><br>
+                <input type="radio" id="none" name="radiogroup" value="none" hidden>
               </div>
             </div>
             <button type="button" class="btn btn-primary" onclick="assignLocation()">Assign</button>
@@ -215,6 +212,11 @@
             }));
           };
           function refreshUUIDs() {
+            document.getElementById("north").disabled = true;
+            document.getElementById("south").disabled = true;
+            document.getElementById("east").disabled = true;
+            document.getElementById("west").disabled = true;
+            document.getElementById("intersection-select").disabled = true;
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "/getLightIDs", true);
             xhr.setRequestHeader('Content-Type', 'application/json');
@@ -239,6 +241,40 @@
               }
             }
           };
+          var xhr = new XMLHttpRequest();
+          var intersection_names;
+          xhr.open("GET", "/getIntersections", true);
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.send();
+          xhr.responseType = 'json';
+          xhr.onload = function() {
+            var intersection_select = document.getElementById('intersection-select');
+            for (var i = 0; i < xhr.response.length; i++) {
+              var option = document.createElement("option");
+              option.text = xhr.response[i];
+              intersection_select.appendChild(option);
+            }
+          }
+          $('#controller-select').change(function() {
+            document.getElementById("north").disabled = false;
+            document.getElementById("south").disabled = false;
+            document.getElementById("east").disabled = false;
+            document.getElementById("west").disabled = false;
+            document.getElementById("intersection-select").disabled = false;
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/getLightState/" + this.value, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send();
+            xhr.responseType = 'json';
+            xhr.onload = function() {
+              var location = xhr.response["direction"];
+              var intersection = xhr.response["intersection_id"];
+              var intersection_select = document.getElementById("intersection-select");
+              intersection_select.selectedIndex = intersection;
+              document.getElementById(location).checked = true;
+            }
+          });
           refreshUUIDs();
         </script>
       </body>

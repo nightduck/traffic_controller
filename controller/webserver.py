@@ -65,6 +65,20 @@ def getLightIDs():
       
   return jsonify({"unassigned": unassigned, "assigned": assigned})
 
+# REST call to get list of all intersection names
+# Returns 500 if error accessing database
+# If successful, returns json object with list of format:
+# [ <intersection_name>, ... ]
+@app.route('/getIntersections', methods=['GET'])
+def getIntersections():
+  intersections = []
+  with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
+      traffic = json.load(json_file)
+      for intersection in traffic["intersections"]:
+          intersections.append(intersection["name"])
+      
+  return jsonify(intersections)
+
 # REST call to remove ID from database
 @app.route('/removeLightID', methods=['POST'])
 def removeLightID():
@@ -124,17 +138,17 @@ def getLightState(uuid):
     while time >= state_durations[state]:
         state += 1
         
-    if intersection["north_light"] == uuid:
-        position = "north_light"
+    if intersection["north"] == uuid:
+        position = "north"
         reported_state = state
-    elif intersection["south_light"] == uuid:
-        position = "south_light"
+    elif intersection["south"] == uuid:
+        position = "south"
         reported_state = state
-    elif intersection["east_light"] == uuid:
-        position = "east_light"
+    elif intersection["east"] == uuid:
+        position = "east"
         reported_state = (state + 4) % 8
-    elif intersection["west_light"] == uuid:
-        position = "west_light"
+    elif intersection["west"] == uuid:
+        position = "west"
         reported_state = (state + 4) % 8
     else:
         return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
@@ -142,7 +156,7 @@ def getLightState(uuid):
     if reported_state == 7:
       reported_state = 6
     
-    return jsonify({uuid: {"id": uuid, "intersection_id": intersection_id, "direction" : position, "state" : reported_state, "remaining_ms": state_durations[state] - time}})
+    return jsonify({"id": uuid, "intersection_id": intersection_id, "direction" : position, "state" : reported_state, "remaining_ms": state_durations[state] - time})
     #return Response(result, status=STATUS_OK, mimetype='application/json')
 
 
