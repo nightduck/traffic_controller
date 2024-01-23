@@ -197,50 +197,76 @@
               yellow2: yellow2,
               red2: red2
             }));
+            xhr.onload = function() {
+              if(xhr.status = 200) {
+                document.querySelector('.text-toast').innerHTML = "";
+              } else {
+                document.querySelector('.text-toast').innerHTML = "Failed to set light timing\n" + xhr.response;
+              }
+            }
           };
-          function assignLocation() {
-            var multibox = document.getElementById("multibox").value;
-            var dropdown = document.getElementById("dropdown").value;
-            var radiogroup = document.querySelector('input[name="radiogroup"]:checked').value;
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/setLightLocation", true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send(JSON.stringify({
-              multibox: multibox,
-              dropdown: dropdown,
-              radiogroup: radiogroup
-            }));
-          };
-          function refreshUUIDs() {
+          function refreshUUIDs(selected_component_uuid = "") {
             document.getElementById("north").disabled = true;
             document.getElementById("south").disabled = true;
             document.getElementById("east").disabled = true;
             document.getElementById("west").disabled = true;
             document.getElementById("intersection-select").disabled = true;
+            document.getElementById("intersection-select").selectedIndex = -1;
+            document.getElementById("none").checked = true;
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "/getLightIDs", true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send();
             xhr.responseType = 'json';
             xhr.onload = function() {
-              var unassigned = document.querySelector('#controller-select > #unassigned');
-              var assigned = document.querySelector('#controller-select > #assigned');
-              var assigned_ids = xhr.response["assigned"];
-              var unassigned_ids = xhr.response["unassigned"];
-              unassigned.innerHTML = "";
-              assigned.innerHTML = "";
-              for (var i = 0; i < assigned_ids.length; i++) {
-                var option = document.createElement("option");
-                option.text = assigned_ids[i];
-                assigned.appendChild(option);
-              }
-              for (var i = 0; i < unassigned_ids.length; i++) {
-                var option = document.createElement("option");
-                option.text = unassigned_ids[i];
-                unassigned.appendChild(option);
+              if(xhr.status = 200) {
+                document.querySelector('.text-toast').innerHTML = "";
+                var unassigned = document.querySelector('#controller-select > #unassigned');
+                var assigned = document.querySelector('#controller-select > #assigned');
+                var assigned_ids = xhr.response["assigned"];
+                var unassigned_ids = xhr.response["unassigned"];
+                unassigned.innerHTML = "";
+                assigned.innerHTML = "";
+                for (var i = 0; i < assigned_ids.length; i++) {
+                  var option = document.createElement("option");
+                  option.text = assigned_ids[i];
+                  assigned.appendChild(option);
+                }
+                for (var i = 0; i < unassigned_ids.length; i++) {
+                  var option = document.createElement("option");
+                  option.text = unassigned_ids[i];
+                  unassigned.appendChild(option);
+                }
+                document.getElementById("intersection-select").value = selected_component_uuid;
+              } else {
+                document.querySelector('.text-toast').innerHTML = "Failed to refresh controllers\n" + xhr.response;
               }
             }
           };
+          function assignLocation() {
+            var controller_id = document.getElementById("controller-select").value;
+            var intersection_id = document.getElementById("intersection-select").selectedIndex;
+            var direction = document.querySelector('input[name="radiogroup"]:checked').value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/setLightLocation/" + controller_id, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+              "intersection_id": intersection_id,
+              "direction": direction
+            }));
+            xhr.onload = function() {
+              if(xhr.status == 200) {
+                document.querySelector('.text-toast').innerHTML = "";
+                refreshUUIDs();
+              } else {
+                document.querySelector('.text-toast').innerHTML = "Failed to assign location\n" + xhr.response;
+              }
+            }
+          };
+          function identifyController() {
+            var controller_id = document.getElementById("controller-select").value;
+            
+          }
           var xhr = new XMLHttpRequest();
           var intersection_names;
           xhr.open("GET", "/getIntersections", true);
@@ -248,11 +274,16 @@
           xhr.send();
           xhr.responseType = 'json';
           xhr.onload = function() {
-            var intersection_select = document.getElementById('intersection-select');
-            for (var i = 0; i < xhr.response.length; i++) {
-              var option = document.createElement("option");
-              option.text = xhr.response[i];
-              intersection_select.appendChild(option);
+            if(xhr.status == 200) {
+              document.querySelector('.text-toast').innerHTML = "";
+              var intersection_select = document.getElementById('intersection-select');
+              for (var i = 0; i < xhr.response.length; i++) {
+                var option = document.createElement("option");
+                option.text = xhr.response[i];
+                intersection_select.appendChild(option);
+              }
+            } else {
+              document.querySelector('.text-toast').innerHTML = "Failed to get list of intersections\n" + xhr.response;
             }
           }
           $('#controller-select').change(function() {
@@ -262,17 +293,27 @@
             document.getElementById("west").disabled = false;
             document.getElementById("intersection-select").disabled = false;
             
+            if (this.value == "") {
+              document.getElementById("intersection-select").selectedIndex = -1;
+              document.getElementById("none").checked = true;
+              return;
+            }
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "/getLightState/" + this.value, true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send();
             xhr.responseType = 'json';
             xhr.onload = function() {
-              var location = xhr.response["direction"];
-              var intersection = xhr.response["intersection_id"];
-              var intersection_select = document.getElementById("intersection-select");
-              intersection_select.selectedIndex = intersection;
-              document.getElementById(location).checked = true;
+              if(xhr.status == 200) {
+                document.querySelector('.text-toast').innerHTML = "";
+                var location = xhr.response["direction"];
+                var intersection = xhr.response["intersection_id"];
+                var intersection_select = document.getElementById("intersection-select");
+                intersection_select.selectedIndex = intersection;
+                document.getElementById(location).checked = true;
+              } else {
+                document.querySelector('.text-toast').innerHTML = "Failed to get state of selected light\n" + xhr.response;
+              }
             }
           });
           refreshUUIDs();

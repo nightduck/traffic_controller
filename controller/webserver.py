@@ -5,6 +5,7 @@ import uuid
 import json
 from time import monotonic
 import os
+import sys
 
 app = Flask(__name__)
 
@@ -109,19 +110,15 @@ def getLightStateAll():
 # }
 @app.route('/getLightState/<uuid>', methods=['GET'])
 def getLightState(uuid):
-    # TODO: Get light state from database
-    # TODO: Update state given timing information and time passed
-    # TODO: Return simplified json with just state information, filtered by ID
-    
-    # Temp:
-    # TODO: Calculate current state of uuid and return json object with info
+    # Calculate current state of uuid and return json object with info
     intersection = None
     traffic = None
     with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
         traffic = json.load(json_file)
         if uuid not in traffic["light_map"]:
             return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
-        if traffic["light_map"][uuid]["state"] == -1: # If light is in error state, return json object as-is
+        if traffic["light_map"][uuid]["state"] == -1 or traffic["light_map"][uuid]["intersection_id"] == -1:
+            # If light is in error state, return json object as-is
             return jsonify(traffic["light_map"][uuid])
         intersection_id = traffic["light_map"][uuid]["intersection_id"]
         intersection = traffic["intersections"][intersection_id]
@@ -157,21 +154,55 @@ def getLightState(uuid):
       reported_state = 6
     
     return jsonify({"id": uuid, "intersection_id": intersection_id, "direction" : position, "state" : reported_state, "remaining_ms": state_durations[state] - time})
+    # TODO: Update json file with new state and duration data
     #return Response(result, status=STATUS_OK, mimetype='application/json')
-
-
-# # REST call to provide intersection and direction of light given ID
-# # Returns 401 if ID not found in database
-# # Returns 404 if ID not assigned to location
-# @app.route('/getLightLocation/<uuid>', methods=['GET'])
-# def getLightLocation(id):
-#     return 501
 
 # REST call to assign light ID to intersection
 # Returns 401 if ID not found in database
 @app.route('/setLightLocation/<uuid>', methods=['POST'])
-def setLightLocation(id):
-    return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
+def setLightLocation(uuid):
+    print("setLightLocation1")
+    if "intersection_id" not in request.json:
+        return Response("Missing intersection_id", status=ERROR_SERVER)
+    if "direction" not in request.json:
+        return Response("Missing direction", status=ERROR_SERVER)
+    intersection_id = request.json["intersection_id"]
+    direction = request.json["direction"]
+    print("setLightLocation2")
+    
+    with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
+        print("setLightLocation3")
+        traffic = json.load(json_file)
+        
+    # Lookup intersection to see if existing controller has been assigned to this location
+    intersection = traffic["intersections"][intersection_id]
+    
+    # If so, lookup that controller and reset it to unassigned
+    old_controller_uuid = intersection[direction]
+    if old_controller_uuid != "":
+        old_controller = traffic["light_map"][old_controller_uuid]
+        old_controller["intersection_id"] = -1
+        old_controller["state"] = 0
+        old_controller["remaining_ms"] = 5000
+        old_controller["direction"] = "none"
+        traffic["light_map"][old_controller_uuid] = old_controller  # Update json
+        
+    # In either case, assign this controller to the location
+    intersection[direction] = uuid
+    traffic["intersections"][intersection_id] = intersection
+    
+    # Update light_map
+    controller = traffic["light_map"][uuid]
+    controller["intersection_id"] = intersection_id
+    controller["direction"] = direction
+    controller["state"] = 0
+    controller["remaining_ms"] = 1000
+    traffic["light_map"][uuid] = controller
+        
+    with open(os.path.dirname(__file__) + "/traffic.json", "w") as json_file:
+        json.dump(traffic, json_file, indent=4)
+        
+    return Response("Success", status=STATUS_OK)
 
 # REST call to set timing information for intersection
 @app.route('/setLightTiming/', methods=['POST'])
