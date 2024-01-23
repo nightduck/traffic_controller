@@ -56,6 +56,7 @@ def index():
 def getLightIDs():
   unassigned = []
   assigned = []
+  indicated = []
   with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
       traffic = json.load(json_file)
       for uuid in traffic["light_map"]:
@@ -63,8 +64,10 @@ def getLightIDs():
               unassigned.append(uuid)
           else:
               assigned.append(uuid)
+          if traffic["light_map"][uuid]["state"] == -1:
+              indicated.append(uuid)
       
-  return jsonify({"unassigned": unassigned, "assigned": assigned})
+  return jsonify({"unassigned": unassigned, "assigned": assigned, "indicated": indicated})
 
 # REST call to get list of all intersection names
 # Returns 500 if error accessing database
@@ -96,6 +99,37 @@ def getLightStateAll():
     # TODO: Calculate current state of all uuids and return list of json objects
     
     return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
+  
+# REST call to set light into error state
+# Returns 401 if ID not found in database
+@app.route('/setLightError', methods=['POST'])
+def setLightError():
+    if "uuid" not in request.json:
+        return Response("Missing uuid", status=ERROR_SERVER)
+    
+    with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
+        traffic = json.load(json_file)
+        
+    # Find if there's another controller with state -1, and if so, set it to 0
+    # Its true state will be updated on the next call to getLightState
+    for other_uuid in traffic["light_map"]:
+        if traffic["light_map"][other_uuid]["state"] == -1:
+            traffic["light_map"][other_uuid]["state"] = 0
+            
+    # Check value of provided uuid
+    uuid = request.json["uuid"]
+    if uuid == "":
+        return Response("Removed error state", status=STATUS_OK)
+    if uuid not in traffic["light_map"]:
+        return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
+          
+    # Set state of provided uuid (if any) to -1
+    traffic["light_map"][uuid]["state"] = -1
+    traffic["light_map"][uuid]["remaining_ms"] = 5000
+    with open(os.path.dirname(__file__) + "/traffic.json", "w") as json_file:
+        json.dump(traffic, json_file, indent=2)
+        
+    return Response("Success", status=STATUS_OK)
 
 # REST call to get light state for specified ID
 # Returns 401 if ID not found in database
@@ -161,17 +195,14 @@ def getLightState(uuid):
 # Returns 401 if ID not found in database
 @app.route('/setLightLocation/<uuid>', methods=['POST'])
 def setLightLocation(uuid):
-    print("setLightLocation1")
     if "intersection_id" not in request.json:
         return Response("Missing intersection_id", status=ERROR_SERVER)
     if "direction" not in request.json:
         return Response("Missing direction", status=ERROR_SERVER)
     intersection_id = request.json["intersection_id"]
     direction = request.json["direction"]
-    print("setLightLocation2")
     
     with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
-        print("setLightLocation3")
         traffic = json.load(json_file)
         
     # Lookup intersection to see if existing controller has been assigned to this location
@@ -200,7 +231,7 @@ def setLightLocation(uuid):
     traffic["light_map"][uuid] = controller
         
     with open(os.path.dirname(__file__) + "/traffic.json", "w") as json_file:
-        json.dump(traffic, json_file, indent=4)
+        json.dump(traffic, json_file, indent=2)
         
     return Response("Success", status=STATUS_OK)
 

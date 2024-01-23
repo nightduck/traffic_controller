@@ -43,7 +43,7 @@
                 </optgroup>
               </select>
               <p align="right">
-              <button type="button" class="btn btn-primary" onclick="identifyController()">Identify</button>
+              <input type="checkbox" id="identify-switch" onclick="">Identify</input>
               <button type="button" class="btn btn-primary" onclick="refreshUUIDs()">Refresh</button>
               </p>
             </div>
@@ -265,7 +265,20 @@
           };
           function identifyController() {
             var controller_id = document.getElementById("controller-select").value;
-            
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/setLightError", true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+              "uuid": controller_id
+            }));
+            xhr.onload = function() {
+              if(xhr.status == 200) {
+                document.querySelector('.text-toast').innerHTML = "";
+              } else {
+                document.querySelector('.text-toast').innerHTML = "Failed to identify controller\n" + xhr.response;
+                return;
+              }
+            }
           }
           var xhr = new XMLHttpRequest();
           var intersection_names;
@@ -293,6 +306,9 @@
             document.getElementById("west").disabled = false;
             document.getElementById("intersection-select").disabled = false;
             
+            if (document.getElementById("identify-switch").checked) {
+              identifyController();
+            }
             if (this.value == "") {
               document.getElementById("intersection-select").selectedIndex = -1;
               document.getElementById("none").checked = true;
