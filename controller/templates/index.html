@@ -43,9 +43,12 @@
                 </optgroup>
               </select>
               <p align="right">
-              <input type="checkbox" id="identify-switch" onclick="">Identify</input>
+              <input type="checkbox" id="identify-switch" onclick="identifyController()">Identify</input>
               <button type="button" class="btn btn-primary" onclick="refreshUUIDs()">Refresh</button>
               </p>
+              <p align="right">
+                <input type="checkbox" id="east-lights-switch" onclick="updateStreetLights()">East Lights</input>
+                <input type="checkbox" id="west-lights-switch" onclick="updateStreetLights()">West Lights</input>
             </div>
             <div class="form-group">
               <label for="intersection-select">Intersection:</label>
@@ -173,6 +176,24 @@
           </div>
         </div>
         <script>
+          function updateStreetLights() {
+            var east = document.getElementById("east-lights-switch").checked;
+            var west = document.getElementById("west-lights-switch").checked;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/setStreetLights", true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+              east: east,
+              west: west
+            }));
+            xhr.onload = function() {
+              if(xhr.status = 200) {
+                document.querySelector('.text-toast').innerHTML = "";
+              } else {
+                document.querySelector('.text-toast').innerHTML = "Failed to update street lights\n" + xhr.response;
+              }
+            }
+          }
           function setLightTiming() {
             var intersection = document.getElementById("intersection").value;
             var green = document.getElementById("green").value;

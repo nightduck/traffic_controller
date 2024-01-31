@@ -6,6 +6,7 @@ import json
 from time import monotonic
 import os
 import sys
+import RPi.GPIO as GPIO
 
 app = Flask(__name__)
 
@@ -46,6 +47,24 @@ def index():
 #     # TODO: Store ID in database
     
 #     return str(id)
+
+# REST call to set street lights
+@app.route('/setStreetLights', methods=['POST'])
+def setStreetLights():
+  # Check if east and west variables are in request
+  if "east" not in request.json or "west" not in request.json:
+    return Response("Missing east or west", status=ERROR_SERVER)
+  
+  # Get east and west variables from request
+  if(request.json["east"]) == "true":
+    GPIO.output(18, GPIO.HIGH)
+  else:
+    GPIO.output(18, GPIO.LOW)
+    
+  if(request.json["west"]) == "true":
+    GPIO.output(23, GPIO.HIGH)
+  else:
+    GPIO.output(23, GPIO.LOW)
 
 # REST call to get list of all IDs
 # Returns 500 if error accessing database
@@ -241,4 +260,8 @@ def setLightTiming():
     return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
 
 if __name__ == '__main__':
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(18, GPIO.OUT)
+    GPIO.setup(23, GPIO.OUT)
     app.run(host='0.0.0.0', port=5000)
+    GPIO.cleanup()
