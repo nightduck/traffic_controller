@@ -65,6 +65,8 @@ def setStreetLights():
     GPIO.output(23, GPIO.HIGH)
   else:
     GPIO.output(23, GPIO.LOW)
+    
+  return Response("Success", status=STATUS_OK)
 
 # REST call to get list of all IDs
 # Returns 500 if error accessing database
