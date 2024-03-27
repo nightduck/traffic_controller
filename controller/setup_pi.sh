@@ -12,8 +12,9 @@ sudo nmcli device wifi hotspot ssid MiniCity password mckelvey ifname wlan0
 uuid=`nmcli connection | grep Hotspot | awk '{print $2}'`
 sudo nmcli connection modify $uuid connection.autoconnect yes connection.autoconnect-priority 100
 
-# Add the following to /etc/rc.local
-echo "description \"Starts the MiniCity server\"" | sudo tee -a /etc/rc.local
-echo "start on startup" | sudo tee -a /etc/rc.local
-echo "task" | sudo tee -a /etc/rc.local
-echo "exec python /home/pi/traffic_controller/controller/app.py" | sudo tee -a /etc/rc.local
+# TODO: This doesn't work
+# Add the following to /etc/init.d/traffic_controller
+echo "description \"Starts the MiniCity server\"" | sudo tee -a /etc/init.d/traffic_controller
+echo "start on startup" | sudo tee -a /etc/init.d/traffic_controller
+echo "task" | sudo tee -a /etc/init.d/traffic_controller
+echo "exec python /home/pi/traffic_controller/controller/app.py" | sudo tee -a /etc/init.d/traffic_controller
