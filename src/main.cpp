@@ -8,6 +8,7 @@
 #include <Wire.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
+#include <Adafruit_NeoPixel.h>
 
 #include "mapping.h"
 
@@ -17,11 +18,19 @@
 
 #define EEPROM_SIZE 512
 
+#define AUTO_LED_PIN 12
+#define AUTO_LED_COUNT 6
+#define PED_LED_PIN 13
+#define PED_LED_COUNT 4
+
 //#define FACTORY_RESET
 
 String uuid = "";
 int intersection_id = -1;
 String intersection_location = "";
+
+Adafruit_NeoPixel auto_lights(AUTO_LED_COUNT, AUTO_LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel ped_lights(PED_LED_COUNT, PED_LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // Turn on built-in LED and spam the UART with a message every couple seconds
 void set_error() {
@@ -42,6 +51,36 @@ void set_traffic_light(int addr, int state) {
 
   Serial.print("0x");
   Serial.println(state, HEX);
+}
+
+
+void set_traffic_lights(int led_mask) {
+  if (led_mask & RED_LIGHT) {
+    auto_lights.setPixelColor(0, 0xFF0000); // Red
+    auto_lights.setPixelColor(3, 0xFF0000);
+  }
+  if (led_mask & YELLOW_LIGHT) {
+    auto_lights.setPixelColor(1, 0xFFFF00); // Yellow
+    auto_lights.setPixelColor(4, 0xFFFF00);
+  }
+  if (led_mask & GREEN_LIGHT) {
+    auto_lights.setPixelColor(2, 0x00FF00); // Green
+    auto_lights.setPixelColor(5, 0x00FF00);
+  }
+  if (led_mask & DNW) {
+    ped_lights.setPixelColor(0, 0xFFA500);  // Orange
+  }
+  if (led_mask & WALK) {
+    ped_lights.setPixelColor(1, 0xAAAAA);   // White
+  }
+  if (led_mask & DNW_PERP) {
+    ped_lights.setPixelColor(2, 0xFFA500);  // Orange
+  }
+  if (led_mask & WALK_PERP) {
+    ped_lights.setPixelColor(3, 0xAAAAA);   // White
+  }
+  Serial.print("0x");
+  Serial.println(led_mask, HEX);
 }
 
 // int enter_state(int led_mask, int blink_mask, int blink_duration, int state_duration, int interrupt_mask) {
@@ -117,7 +156,7 @@ int enter_state(int state, int duration_ms, int interrupt_mask) {
       break;
   }
 
-  set_traffic_light(NE_CORNER_ADDR, led_mask);
+  set_traffic_lights(led_mask);
 
   while(time < duration_ms && !(interrupt_state & interrupt_mask)) {
     delay(100);
@@ -125,7 +164,7 @@ int enter_state(int state, int duration_ms, int interrupt_mask) {
 
     if (time % 800 == 0) {
       led_mask ^= blink_mask;
-      set_traffic_light(NE_CORNER_ADDR, led_mask);
+      set_traffic_lights(led_mask);
     }
   }
 
@@ -167,6 +206,9 @@ void setup() {
     Wire.beginTransmission(NE_CORNER_ADDR);
     Wire.write(buf, 11);
     Wire.endTransmission();
+
+    auto_lights.begin();
+    ped_lights.begin();
 
     EEPROM.begin(EEPROM_SIZE);
     
