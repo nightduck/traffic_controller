@@ -56,12 +56,12 @@ def setStreetLights():
     return Response("Missing east or west", status=ERROR_SERVER)
   
   # Get east and west variables from request
-  if(request.json["east"]) == "true":
+  if(request.json["east"]) == True:
     GPIO.output(18, GPIO.HIGH)
   else:
     GPIO.output(18, GPIO.LOW)
     
-  if(request.json["west"]) == "true":
+  if(request.json["west"]) == True:
     GPIO.output(23, GPIO.HIGH)
   else:
     GPIO.output(23, GPIO.LOW)
