@@ -222,9 +222,9 @@ void loop() {
         Serial.println(payload);
         DynamicJsonDocument doc(1024);
         deserializeJson(doc, payload);
-        int state = doc[uuid]["state"].as<int>();
-        int remaining_ms = doc[uuid]["remaining_ms"].as<int>();
-        int blink_duration = doc[uuid]["blink_duration"].as<int>();
+        int state = doc["state"].as<int>();
+        int remaining_ms = doc["remaining_ms"].as<int>();
+        int blink_duration = doc["blink_duration"].as<int>();
         // int interrupt_mask = doc["interrupt_mask"].as<int>();
         Serial.println("State: " + String(state) + " Remaining: " + String(remaining_ms) + " Blink: " + String(blink_duration));
         int interrupt_state = enter_state(state, remaining_ms, 0);
