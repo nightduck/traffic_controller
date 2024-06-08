@@ -13,8 +13,8 @@
 #include "mapping.h"
 
 #define SSID "MiniCity"
-#define PASSWORD "mckelvey"
-#define SERVER "http://10.42.0.1:5000/"
+#define PASSWORD "McKelvey3rdfloor"
+#define SERVER "http://192.168.204.36:5000/"
 
 #define EEPROM_SIZE 512
 
@@ -79,6 +79,8 @@ void set_traffic_lights(int led_mask) {
   if (led_mask & WALK_PERP) {
     ped_lights.setPixelColor(3, 0xAAAAA);   // White
   }
+  auto_lights.show();
+  ped_lights.show();
   Serial.print("0x");
   Serial.println(led_mask, HEX);
 }
@@ -283,5 +285,12 @@ void loop() {
         delay(1000);
     } else {
       delay(1000);
+
+      auto_lights.setPixelColor(0, 0xFF0000); // Red
+      auto_lights.setPixelColor(1, 0xFFFF00); // Yellow
+      auto_lights.setPixelColor(2, 0x00FF00); // Green
+      auto_lights.show();
+      ped_lights.clear();
+      ped_lights.show();
     }
 }
