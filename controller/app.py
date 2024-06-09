@@ -6,7 +6,29 @@ import json
 from time import monotonic
 import os
 import sys
-import RPi.GPIO as GPIO
+import re
+
+using_rpi = True
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    using_rpi = False
+    print("RPi.GPIO not found. Running in simulation mode.")
+    class GPIO:
+        OUT = "OUT"
+        HIGH = "HIGH"
+        LOW = "LOW"
+        BCM = "BCM"
+        def setmode(mode):
+            pass
+        def setup(pin, mode):
+            pass
+        def output(pin, state):
+            print("GPIO", pin, "set to", state)
+        def cleanup():
+            pass
+
+DIR_NAME = os.path.dirname(os.path.realpath(__file__))
 
 app = Flask(__name__)
 
@@ -78,7 +100,7 @@ def getLightIDs():
   unassigned = []
   assigned = []
   indicated = []
-  with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
+  with open(DIR_NAME + "/traffic.json", "r") as json_file:
       traffic = json.load(json_file)
       for uuid in traffic["light_map"]:
           if traffic["light_map"][uuid]["intersection_id"] == -1:
@@ -97,7 +119,7 @@ def getLightIDs():
 @app.route('/getIntersections', methods=['GET'])
 def getIntersections():
   intersections = []
-  with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
+  with open(DIR_NAME + "/traffic.json", "r") as json_file:
       traffic = json.load(json_file)
       for intersection in traffic["intersections"]:
           intersections.append(intersection["name"])
@@ -128,7 +150,7 @@ def setLightError():
     if "uuid" not in request.json:
         return Response("Missing uuid", status=ERROR_SERVER)
     
-    with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
+    with open(DIR_NAME + "/traffic.json", "r") as json_file:
         traffic = json.load(json_file)
         
     # Find if there's another controller with state -1, and if so, set it to 0
@@ -168,7 +190,7 @@ def getLightState(uuid):
     # Calculate current state of uuid and return json object with info
     intersection = None
     traffic = None
-    with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
+    with open(DIR_NAME + "/traffic.json", "r") as json_file:
         traffic = json.load(json_file)
         if uuid not in traffic["light_map"]:
             return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
@@ -223,7 +245,7 @@ def setLightLocation(uuid):
     intersection_id = request.json["intersection_id"]
     direction = request.json["direction"]
     
-    with open(os.path.dirname(__file__) + "/traffic.json", "r") as json_file:
+    with open(DIR_NAME + "/traffic.json", "r") as json_file:
         traffic = json.load(json_file)
         
     # Lookup intersection to see if existing controller has been assigned to this location
@@ -251,7 +273,7 @@ def setLightLocation(uuid):
     controller["remaining_ms"] = 1000
     traffic["light_map"][uuid] = controller
         
-    with open(os.path.dirname(__file__) + "/traffic.json", "w") as json_file:
+    with open(DIR_NAME + "/traffic.json", "w") as json_file:
         json.dump(traffic, json_file, indent=2)
         
     return Response("Success", status=STATUS_OK)
