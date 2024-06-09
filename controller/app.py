@@ -80,9 +80,9 @@ def setStreetLights():
   
   # Get east and west variables from request
   if(request.json["lights"]) == True:
-    GPIO.output(18, GPIO.HIGH)
-  else:
     GPIO.output(18, GPIO.LOW)
+  else:
+    GPIO.output(18, GPIO.HIGH)
     
   return Response("Success", status=STATUS_OK)
 
