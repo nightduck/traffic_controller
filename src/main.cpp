@@ -55,6 +55,8 @@ void set_traffic_light(int addr, int state) {
 
 
 void set_traffic_lights(int led_mask) {
+  auto_lights.clear();
+  ped_lights.clear();
   if (led_mask & RED_LIGHT) {
     auto_lights.setPixelColor(0, 0xFF0000); // Red
     auto_lights.setPixelColor(3, 0xFF0000);
