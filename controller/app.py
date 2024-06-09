@@ -34,6 +34,7 @@ app = Flask(__name__)
 
 ERROR_NOT_IMPLEMENTED = 501
 ERROR_SERVER = 500
+ERROR_ARGUMENTS = 400
 ERROR_UNKNOWN_ID = 401      # ID not found in database, must request new ID with /getLightID
 ERROR_NOT_FOUND = 404
 STATUS_OK = 200
@@ -233,6 +234,27 @@ def getLightState(uuid):
     return jsonify({"id": uuid, "intersection_id": intersection_id, "direction" : position, "state" : reported_state, "remaining_ms": state_durations[state] - time})
     # TODO: Update json file with new state and duration data
     #return Response(result, status=STATUS_OK, mimetype='application/json')
+    
+# REST call to register a new UUID with server
+# Returns 400 if argument is ill-formed
+# Returns 200 if successful or if UUID already registered
+@app.route('/register/<uuid>', methods=['POST'])
+def register(uuid):
+    # Verify uuid is in the format of a uuid
+    uuid_regex = re.compile(r'^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$')
+    if not uuid_regex.match(uuid):
+        return Response("UUID not correctly formatted", status=ERROR_ARGUMENTS)
+    
+    with open(DIR_NAME + "/traffic.json", "r") as json_file:
+        traffic = json.load(json_file)
+    
+    if uuid not in traffic["light_map"]:
+        traffic["light_map"][uuid] = {"id" : uuid, "intersection_id": -1, "direction": "none", "state": 0, "remaining_ms": 5000}
+        
+        with open(DIR_NAME + "/traffic.json", "w") as json_file:
+            json.dump(traffic, json_file, indent=2)
+        
+    return Response("Success", status=STATUS_OK)
 
 # REST call to assign light ID to intersection
 # Returns 401 if ID not found in database

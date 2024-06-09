@@ -278,10 +278,10 @@ void loop() {
         // }
         // enter_state(state, remaining_ms, 0);
     } else if (httpCode == 401) {
-        // If the server returns 401, the light is not registered. Do nothing
-        // uuid = "";
-        intersection_id = -1;
-        intersection_location = "";
+        // If the server returns 401, the light is not registered. Register it.
+        http.begin(wifi, String(SERVER) + "register/" + uuid);
+        int httpCode = http.POST("");
+        Serial.println("Registered " + String(uuid) + ". Got code" + String(httpCode));
         delay(1000);
     } else {
       delay(1000);
