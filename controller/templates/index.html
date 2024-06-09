@@ -47,8 +47,8 @@
               <button type="button" class="btn btn-primary" onclick="refreshUUIDs()">Refresh</button>
               </p>
               <p align="right">
-                <input type="checkbox" id="east-lights-switch" onclick="updateStreetLights()">East Lights</input>
-                <input type="checkbox" id="west-lights-switch" onclick="updateStreetLights()">West Lights</input>
+                <input type="checkbox" id="lights-switch" onclick="updateStreetLights()">Lights</input>
+              </p>
             </div>
             <div class="form-group">
               <label for="intersection-select">Intersection:</label>
@@ -177,14 +177,12 @@
         </div>
         <script>
           function updateStreetLights() {
-            var east = document.getElementById("east-lights-switch").checked;
-            var west = document.getElementById("west-lights-switch").checked;
+            var lights = document.getElementById("lights-switch").checked;
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/setStreetLights", true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send(JSON.stringify({
-              east: east,
-              west: west
+              lights: lights
             }));
             xhr.onload = function() {
               if(xhr.status = 200) {

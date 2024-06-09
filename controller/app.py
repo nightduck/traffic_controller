@@ -75,19 +75,14 @@ def index():
 @app.route('/setStreetLights', methods=['POST'])
 def setStreetLights():
   # Check if east and west variables are in request
-  if "east" not in request.json or "west" not in request.json:
-    return Response("Missing east or west", status=ERROR_SERVER)
+  if "lights" not in request.json:
+    return Response("Missing lights key", status=ERROR_ARGUMENTS)
   
   # Get east and west variables from request
-  if(request.json["east"]) == True:
+  if(request.json["lights"]) == True:
     GPIO.output(18, GPIO.HIGH)
   else:
     GPIO.output(18, GPIO.LOW)
-    
-  if(request.json["west"]) == True:
-    GPIO.output(23, GPIO.HIGH)
-  else:
-    GPIO.output(23, GPIO.LOW)
     
   return Response("Success", status=STATUS_OK)
 
@@ -195,8 +190,8 @@ def getLightState(uuid):
         traffic = json.load(json_file)
         if uuid not in traffic["light_map"]:
             return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
-        if traffic["light_map"][uuid]["state"] == -1 or traffic["light_map"][uuid]["intersection_id"] == -1:
-            # If light is in error state, return json object as-is
+        if traffic["light_map"][uuid]["state"] <= 0 or traffic["light_map"][uuid]["intersection_id"] == -1:
+            # If light is in non standard state, return json object as-is
             return jsonify(traffic["light_map"][uuid])
         intersection_id = traffic["light_map"][uuid]["intersection_id"]
         intersection = traffic["intersections"][intersection_id]
