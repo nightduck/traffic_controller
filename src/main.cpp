@@ -14,7 +14,7 @@
 
 #define SSID "MiniCity"
 #define PASSWORD "McKelvey3rdfloor"
-#define SERVER "http://192.168.204.36:5000/"
+#define SERVER "http://192.168.0.24:80/"
 
 #define EEPROM_SIZE 512
 
