@@ -11,10 +11,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "mapping.h"
-
-#define SSID "MiniCity"
-#define PASSWORD "McKelvey3rdfloor"
-#define SERVER "http://192.168.0.24:80/"
+#include "wifi_credentials.h"
 
 #define EEPROM_SIZE 512
 

@@ -304,5 +304,5 @@ if __name__ == '__main__':
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(18, GPIO.OUT)
     GPIO.setup(23, GPIO.OUT)
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=5000)
     GPIO.cleanup()
