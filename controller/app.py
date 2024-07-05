@@ -30,6 +30,8 @@ except ImportError:
             self.states[pin] = state
             print("GPIO", pin, "set to", state)
         def input(self, pin):
+            if pin not in self.states:
+                self.states[pin] = self.HIGH
             return self.states[pin]
         def cleanup():
             pass
@@ -95,12 +97,13 @@ def setStreetLights():
 
 # REST call to set street lights
 @app.route('/getStreetLights', methods=['GET'])
-def getStreetLights():
-  # Check if east and west variables are in request
-  if "lights" not in request.json:
-    return Response("Missing lights key", status=ERROR_ARGUMENTS)
-  
+def getStreetLights():  
   state = GPIO.input(18)
+
+  if state == GPIO.LOW:
+    state = True
+  else:
+    state = False
     
   return jsonify({"lights": state})
 
