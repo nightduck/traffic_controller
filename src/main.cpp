@@ -20,6 +20,13 @@
 #define PED_LED_PIN 13
 #define PED_LED_COUNT 4
 
+#define STATE_CONNECTION_ERROR -1
+#define STATE_UNASSIGNED -2
+#define STATE_IDENTIFY -3
+
+#define MAX_WAIT_TIME 5000
+#define DEFAULT_BLINK_DURATION 800
+
 //#define FACTORY_RESET
 
 String uuid = "";
@@ -48,6 +55,48 @@ void set_traffic_light(int addr, int state) {
 
   Serial.print("0x");
   Serial.println(state, HEX);
+}
+
+int set_error_state(int state, int timeout = DEFAULT_BLINK_DURATION) {
+  // Turn off pedestrian lights
+  ped_lights.clear();
+  ped_lights.show();
+
+  // Toggle red light
+  uint32_t red_state = auto_lights.getPixelColor(0);
+  auto_lights.setPixelColor(0, red_state ^= 0xFF0000);
+  auto_lights.setPixelColor(3, red_state ^= 0xFF0000);
+
+  switch(state) {
+    case STATE_CONNECTION_ERROR:
+      auto_lights.setPixelColor(1, 0x000000); // Turn off yellow light
+      auto_lights.setPixelColor(4, 0x000000);
+      auto_lights.setPixelColor(2, 0x000000); // Turn off green light
+      auto_lights.setPixelColor(5, 0x000000);
+      break;
+    case STATE_UNASSIGNED:
+      auto_lights.setPixelColor(1, 0xFFFF00); // Turn on yellow light
+      auto_lights.setPixelColor(4, 0xFFFF00);
+      auto_lights.setPixelColor(2, 0x00FF00); // Turn on green light
+      auto_lights.setPixelColor(5, 0x00FF00);
+      break;
+    case STATE_IDENTIFY:
+      auto_lights.setPixelColor(1, 0x0000FF); // Turn on blue light
+      auto_lights.setPixelColor(4, 0x0000FF);
+      auto_lights.setPixelColor(2, 0x0000FF); // Turn on blue light
+      auto_lights.setPixelColor(5, 0x0000FF);
+      break;
+    default:
+      auto_lights.setPixelColor(1, 0xFFFF00); // Turn off yellow light
+      auto_lights.setPixelColor(4, 0xFFFF00);
+      auto_lights.setPixelColor(2, 0x000000); // Turn on green light
+      auto_lights.setPixelColor(5, 0x000000);
+      break;
+  }
+  auto_lights.show();
+  delay(min(DEFAULT_BLINK_DURATION, timeout));
+
+  return 0;
 }
 
 
@@ -122,6 +171,16 @@ void set_traffic_lights(int led_mask) {
 int enter_state(int state, int duration_ms, int interrupt_mask) {
   Serial.println("Entering state " + String(state) + " for " + String(duration_ms) + "ms");
   int led_mask, blink_mask, time = 0, interrupt_state = 0;
+
+  // Handle error/special states
+  if (state < 0) {
+    do {
+      interrupt_state = set_error_state(state);
+      time += DEFAULT_BLINK_DURATION;
+    } while(time < duration_ms && !(interrupt_state & interrupt_mask));
+    return 0;
+  }
+
   switch(state) {
     case 0:
       led_mask = GREEN_LIGHT | WALK | DNW_PERP;
@@ -152,7 +211,7 @@ int enter_state(int state, int duration_ms, int interrupt_mask) {
       blink_mask = 0;
       break;
     default:
-      led_mask = RED_LIGHT | WALK; // Impossible state
+      led_mask = RED_LIGHT | YELLOW_LIGHT | WALK; // Impossible state
       blink_mask = RED_LIGHT;
       break;
   }
@@ -163,7 +222,7 @@ int enter_state(int state, int duration_ms, int interrupt_mask) {
     delay(100);
     time+=100;
 
-    if (time % 800 == 0) {
+    if (time % DEFAULT_BLINK_DURATION == 0) {
       led_mask ^= blink_mask;
       set_traffic_lights(led_mask);
     }
@@ -186,11 +245,15 @@ int enter_state(int state, int duration_ms, int interrupt_mask) {
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
+
+    auto_lights.begin();
+    ped_lights.begin();
+
     Wire.begin();
     WiFi.begin(SSID, PASSWORD);
     while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
+      enter_state(STATE_CONNECTION_ERROR, DEFAULT_BLINK_DURATION, 0);
+      Serial.print(".");
     }
     Serial.println("");
     Serial.println("WiFi connected");
@@ -207,9 +270,6 @@ void setup() {
     Wire.beginTransmission(NE_CORNER_ADDR);
     Wire.write(buf, 11);
     Wire.endTransmission();
-
-    auto_lights.begin();
-    ped_lights.begin();
 
     EEPROM.begin(EEPROM_SIZE);
     
@@ -270,7 +330,7 @@ void loop() {
         int blink_duration = doc["blink_duration"].as<int>();
         // int interrupt_mask = doc["interrupt_mask"].as<int>();
         Serial.println("State: " + String(state) + " Remaining: " + String(remaining_ms) + " Blink: " + String(blink_duration));
-        int interrupt_state = enter_state(state, remaining_ms, 0);
+        int interrupt_state = enter_state(state, min(remaining_ms, MAX_WAIT_TIME), 0);
         // if (interrupt_state & interrupt_mask) {
         //     http.begin(SERVER + "setLightState/" + uuid + "/" + interrupt_state);
         //     http.GET();
@@ -283,13 +343,6 @@ void loop() {
         Serial.println("Registered " + String(uuid) + ". Got code" + String(httpCode));
         delay(1000);
     } else {
-      delay(1000);
-
-      auto_lights.setPixelColor(0, 0xFF0000); // Red
-      auto_lights.setPixelColor(1, 0xFFFF00); // Yellow
-      auto_lights.setPixelColor(2, 0x00FF00); // Green
-      auto_lights.show();
-      ped_lights.clear();
-      ped_lights.show();
+      enter_state(STATE_CONNECTION_ERROR, MAX_WAIT_TIME, 0);
     }
 }
