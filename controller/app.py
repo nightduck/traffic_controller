@@ -14,19 +14,26 @@ try:
 except ImportError:
     using_rpi = False
     print("RPi.GPIO not found. Running in simulation mode.")
-    class GPIO:
+    class GPIO_Fake:
         OUT = "OUT"
         HIGH = "HIGH"
         LOW = "LOW"
         BCM = "BCM"
-        def setmode(mode):
+        states = {}
+        def __init__(self):
             pass
-        def setup(pin, mode):
+        def setmode(self, mode):
             pass
-        def output(pin, state):
+        def setup(self, pin, mode):
+            pass
+        def output(self, pin, state):
+            self.states[pin] = state
             print("GPIO", pin, "set to", state)
+        def input(self, pin):
+            return self.states[pin]
         def cleanup():
             pass
+    GPIO = GPIO_Fake()
 
 DIR_NAME = os.path.dirname(os.path.realpath(__file__))
 
@@ -74,7 +81,7 @@ def index():
 # REST call to set street lights
 @app.route('/setStreetLights', methods=['POST'])
 def setStreetLights():
-  # Check if east and west variables are in request
+  # Check if request is formatted correctly
   if "lights" not in request.json:
     return Response("Missing lights key", status=ERROR_ARGUMENTS)
   
@@ -85,6 +92,17 @@ def setStreetLights():
     GPIO.output(18, GPIO.HIGH)
     
   return Response("Success", status=STATUS_OK)
+
+# REST call to set street lights
+@app.route('/getStreetLights', methods=['GET'])
+def getStreetLights():
+  # Check if east and west variables are in request
+  if "lights" not in request.json:
+    return Response("Missing lights key", status=ERROR_ARGUMENTS)
+  
+  state = GPIO.input(18)
+    
+  return jsonify({"lights": state})
 
 # REST call to get list of all IDs
 # Returns 500 if error accessing database

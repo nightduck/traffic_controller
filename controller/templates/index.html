@@ -318,13 +318,33 @@
               document.querySelector('.text-toast').innerHTML = "Failed to get list of intersections\n" + xhr.response;
             }
           }
+
+          // Check the state of the street lights and update lights-switch checkbox
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", "/getStreetLights", true);
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.send();
+          xhr.responseType = 'json';
+          xhr.onload = function() {
+            if(xhr.status == 200) {
+              document.querySelector('.text-toast').innerHTML = "";
+              document.getElementById("lights-switch").checked = xhr.response["lights"];
+            } else {
+              document.querySelector('.text-toast').innerHTML = "Failed to get state of street lights\n" + xhr.response;
+            }
+          }
+
+          // Call identifyController() with no light selected to reset the identify of the street lights
+          document.getElementById("controller-select").selectedIndex = -1;
+          identifyController();
+
           $('#controller-select').change(function() {
             document.getElementById("north").disabled = false;
             document.getElementById("south").disabled = false;
             document.getElementById("east").disabled = false;
             document.getElementById("west").disabled = false;
             document.getElementById("intersection-select").disabled = false;
-            
+
             if (document.getElementById("identify-switch").checked) {
               identifyController();
             }
