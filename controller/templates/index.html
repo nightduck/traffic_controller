@@ -266,7 +266,7 @@
           function removeUUID(selected_component_uuid = "") {
             var controller_id = document.getElementById("controller-select").value;
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", "/removeLightID", true);
+            xhr.open("POST", "/removeLightID", true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send(JSON.stringify({
               uuid: controller_id

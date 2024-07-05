@@ -146,7 +146,38 @@ def getIntersections():
 # REST call to remove ID from database
 @app.route('/removeLightID', methods=['POST'])
 def removeLightID():
-    return Response("Not implemented", status=ERROR_NOT_IMPLEMENTED)
+  # Input sanitization
+  if "uuid" not in request.json:
+    return Response("Missing uuid", status=ERROR_ARGUMENTS)
+
+  # Read in traffic.json
+  with open(DIR_NAME + "/traffic.json", "r") as json_file:
+    traffic = json.load(json_file)
+    if request.json["uuid"] not in traffic["light_map"]:
+      return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
+
+    # Remove ID from intersection
+    intersection_id = traffic["light_map"][request.json["uuid"]]["intersection_id"]
+    if intersection_id != -1:
+      intersection = traffic["intersections"][intersection_id]
+      if intersection["north"] == request.json["uuid"]:
+        intersection["north"] = ""
+      elif intersection["south"] == request.json["uuid"]:
+        intersection["south"] = ""
+      elif intersection["east"] == request.json["uuid"]:
+        intersection["east"] = ""
+      elif intersection["west"] == request.json["uuid"]:
+        intersection["west"] = ""
+      traffic["intersections"][intersection_id] = intersection
+
+    # Remove ID from light_map
+    del traffic["light_map"][request.json["uuid"]]
+    
+  # Write back to traffic.json
+  with open(DIR_NAME + "/traffic.json", "w") as json_file:
+    json.dump(traffic, json_file, indent=2)
+    
+  return Response("Success", status=STATUS_OK)
 
 # REST call to get light state for all intersections
 # Returns 500 if error accessing database
