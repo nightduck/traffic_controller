@@ -45,6 +45,7 @@
               <p align="right">
               <input type="checkbox" id="identify-switch" onclick="identifyController()">Identify</input>
               <button type="button" class="btn btn-primary" onclick="refreshUUIDs()">Refresh</button>
+              <button type="button" class="btn btn-primary" onclick="removeUUID()">Remove</button>
               </p>
               <p align="right">
                 <input type="checkbox" id="lights-switch" onclick="updateStreetLights()">Lights</input>
@@ -258,7 +259,24 @@
                 }
                 document.getElementById("intersection-select").value = selected_component_uuid;
               } else {
-                document.querySelector('.text-toast').innerHTML = "Failed to refresh controllers\n" + xhr.response;
+                document.querySelector('.text-toast').innerHTML = "Failed to refresh controller\n" + xhr.response;
+              }
+            }
+          };
+          function removeUUID(selected_component_uuid = "") {
+            var controller_id = document.getElementById("controller-select").value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/removeLightID", true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+              uuid: controller_id
+            }));
+            xhr.responseType = 'json';
+            xhr.onload = function() {
+              if(xhr.status == 200) {
+                refreshUUIDs();
+              } else {
+                document.querySelector('.text-toast').innerHTML = "Failed to remove controllers\n" + xhr.response;
               }
             }
           };
@@ -320,6 +338,7 @@
             }
           }
 
+          // TODO: Put this into a function that gets called periodically, along with refreshUUIDs()
           // Check the state of the street lights and update lights-switch checkbox
           var xhr_lights = new XMLHttpRequest();
           xhr_lights.open("GET", "/getStreetLights", true);
