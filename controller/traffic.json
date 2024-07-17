@@ -2,10 +2,10 @@
   "intersections": [
     {
       "name": "2nd and Broadway",
-      "north": "6542a3c3-9c51-f7bf-5436-5cda89d54c03",
-      "south": "7cb4ac4e-d038-143f-74bc-efddbbeb505f",
-      "east": "2b54847f-cca6-c574-1529-57bbf930e326",
-      "west": "1d2dff07-fa6d-456f-8047-4e31c72c3907",
+      "north": "",
+      "south": "",
+      "east": "",
+      "west": "",
       "id": 0,
       "ns_green_ms": 30000,
       "ew_green_ms": 30000,
@@ -17,10 +17,10 @@
     },
     {
       "name": "3rd and Broadway",
-      "north": "6542a3c3-9c51-f7bf-5436-5cda89d54c03",
-      "south": "7cb4ac4e-d038-143f-74bc-efddbbeb505f",
-      "east": "2b54847f-cca6-c574-1529-57bbf930e326",
-      "west": "1d2dff07-fa6d-456f-8047-4e31c72c3907",
+      "north": "",
+      "south": "",
+      "east": "",
+      "west": "",
       "id": 0,
       "ns_green_ms": 30000,
       "ew_green_ms": 30000,
@@ -32,10 +32,10 @@
     },
     {
       "name": "2nd and Danforth",
-      "north": "6542a3c3-9c51-f7bf-5436-5cda89d54c03",
-      "south": "7cb4ac4e-d038-143f-74bc-efddbbeb505f",
-      "east": "2b54847f-cca6-c574-1529-57bbf930e326",
-      "west": "1d2dff07-fa6d-456f-8047-4e31c72c3907",
+      "north": "",
+      "south": "",
+      "east": "",
+      "west": "",
       "id": 0,
       "ns_green_ms": 30000,
       "ew_green_ms": 30000,
@@ -47,10 +47,10 @@
     },
     {
       "name": "Main and Danforth",
-      "north": "6542a3c3-9c51-f7bf-5436-5cda89d54c03",
-      "south": "7cb4ac4e-d038-143f-74bc-efddbbeb505f",
-      "east": "2b54847f-cca6-c574-1529-57bbf930e326",
-      "west": "1d2dff07-fa6d-456f-8047-4e31c72c3907",
+      "north": "",
+      "south": "",
+      "east": "",
+      "west": "",
       "id": 0,
       "ns_green_ms": 30000,
       "ew_green_ms": 30000,
@@ -62,40 +62,5 @@
     }
   ],
   "light_map": {
-    "7cb4ac4e-d038-143f-74bc-efddbbeb505f": {
-      "id": "7cb4ac4e-d038-143f-74bc-efddbbeb505f",
-      "intersection_id": 0,
-      "direction": "south",
-      "state": 0,
-      "remaining_ms": 5000
-    },
-    "6542a3c3-9c51-f7bf-5436-5cda89d54c03": {
-      "id": "6542a3c3-9c51-f7bf-5436-5cda89d54c03",
-      "intersection_id": 0,
-      "direction": "north",
-      "state": 0,
-      "remaining_ms": 1000
-    },
-    "2b54847f-cca6-c574-1529-57bbf930e326": {
-      "id": "2b54847f-cca6-c574-1529-57bbf930e326",
-      "intersection_id": 0,
-      "direction": "east",
-      "state": 0,
-      "remaining_ms": 5000
-    },
-    "1d2dff07-fa6d-456f-8047-4e31c72c3907": {
-      "id": "1d2dff07-fa6d-456f-8047-4e31c72c3907",
-      "intersection_id": 0,
-      "direction": "west",
-      "state": 0,
-      "remaining_ms": 5000
-    },
-    "769441bb-5e22-5493-ed79-6c6d33a056b8": {
-      "id": "769441bb-5e22-5493-ed79-6c6d33a056b8",
-      "intersection_id": -1,
-      "direction": "none",
-      "state": 0,
-      "remaining_ms": 5000
-    }
   }
 }
