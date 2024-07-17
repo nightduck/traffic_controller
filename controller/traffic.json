@@ -14,6 +14,51 @@
       "all_red_ms": 2000,
       "pedestrian_ms": 10000,
       "timing_offset_ms": 0
+    },
+    {
+      "name": "3rd and Broadway",
+      "north": "6542a3c3-9c51-f7bf-5436-5cda89d54c03",
+      "south": "7cb4ac4e-d038-143f-74bc-efddbbeb505f",
+      "east": "2b54847f-cca6-c574-1529-57bbf930e326",
+      "west": "1d2dff07-fa6d-456f-8047-4e31c72c3907",
+      "id": 0,
+      "ns_green_ms": 30000,
+      "ew_green_ms": 30000,
+      "ns_yellow_ms": 4000,
+      "ew_yellow_ms": 4000,
+      "all_red_ms": 2000,
+      "pedestrian_ms": 10000,
+      "timing_offset_ms": 0
+    },
+    {
+      "name": "2nd and Danforth",
+      "north": "6542a3c3-9c51-f7bf-5436-5cda89d54c03",
+      "south": "7cb4ac4e-d038-143f-74bc-efddbbeb505f",
+      "east": "2b54847f-cca6-c574-1529-57bbf930e326",
+      "west": "1d2dff07-fa6d-456f-8047-4e31c72c3907",
+      "id": 0,
+      "ns_green_ms": 30000,
+      "ew_green_ms": 30000,
+      "ns_yellow_ms": 4000,
+      "ew_yellow_ms": 4000,
+      "all_red_ms": 2000,
+      "pedestrian_ms": 10000,
+      "timing_offset_ms": 0
+    },
+    {
+      "name": "Main and Danforth",
+      "north": "6542a3c3-9c51-f7bf-5436-5cda89d54c03",
+      "south": "7cb4ac4e-d038-143f-74bc-efddbbeb505f",
+      "east": "2b54847f-cca6-c574-1529-57bbf930e326",
+      "west": "1d2dff07-fa6d-456f-8047-4e31c72c3907",
+      "id": 0,
+      "ns_green_ms": 30000,
+      "ew_green_ms": 30000,
+      "ns_yellow_ms": 4000,
+      "ew_yellow_ms": 4000,
+      "all_red_ms": 2000,
+      "pedestrian_ms": 10000,
+      "timing_offset_ms": 0
     }
   ],
   "light_map": {

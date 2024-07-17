@@ -299,19 +299,20 @@
               }
             }
           }
-          var xhr = new XMLHttpRequest();
+          
+          var xhr_intersection = new XMLHttpRequest();
           var intersection_names;
-          xhr.open("GET", "/getIntersections", true);
-          xhr.setRequestHeader('Content-Type', 'application/json');
-          xhr.send();
-          xhr.responseType = 'json';
-          xhr.onload = function() {
-            if(xhr.status == 200) {
+          xhr_intersection.open("GET", "/getIntersections", true);
+          xhr_intersection.setRequestHeader('Content-Type', 'application/json');
+          xhr_intersection.send();
+          xhr_intersection.responseType = 'json';
+          xhr_intersection.onload = function() {
+            if(xhr_intersection.status == 200) {
               document.querySelector('.text-toast').innerHTML = "";
               var intersection_select = document.getElementById('intersection-select');
-              for (var i = 0; i < xhr.response.length; i++) {
+              for (var i = 0; i < xhr_intersection.response.length; i++) {
                 var option = document.createElement("option");
-                option.text = xhr.response[i];
+                option.text = xhr_intersection.response[i];
                 intersection_select.appendChild(option);
               }
             } else {
@@ -320,15 +321,15 @@
           }
 
           // Check the state of the street lights and update lights-switch checkbox
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", "/getStreetLights", true);
-          xhr.setRequestHeader('Content-Type', 'application/json');
-          xhr.send();
-          xhr.responseType = 'json';
-          xhr.onload = function() {
-            if(xhr.status == 200) {
+          var xhr_lights = new XMLHttpRequest();
+          xhr_lights.open("GET", "/getStreetLights", true);
+          xhr_lights.setRequestHeader('Content-Type', 'application/json');
+          xhr_lights.send();
+          xhr_lights.responseType = 'json';
+          xhr_lights.onload = function() {
+            if(xhr_lights.status == 200) {
               document.querySelector('.text-toast').innerHTML = "";
-              document.getElementById("lights-switch").checked = xhr.response["lights"];
+              document.getElementById("lights-switch").checked = xhr_lights.response["lights"];
             } else {
               document.querySelector('.text-toast').innerHTML = "Failed to get state of street lights\n" + xhr.response;
             }
