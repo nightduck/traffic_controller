@@ -242,7 +242,7 @@ def getLightState(uuid):
         traffic = json.load(json_file)
         if uuid not in traffic["light_map"]:
             return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
-        if traffic["light_map"][uuid]["state"] <= 0 or traffic["light_map"][uuid]["intersection_id"] == -1:
+        if traffic["light_map"][uuid]["state"] < 0:
             # If light is in non standard state, return json object as-is
             return jsonify(traffic["light_map"][uuid])
         intersection_id = traffic["light_map"][uuid]["intersection_id"]
@@ -278,7 +278,9 @@ def getLightState(uuid):
     if reported_state == 7:
       reported_state = 6
     
-    return jsonify({"id": uuid, "intersection_id": intersection_id, "direction" : position, "state" : reported_state, "remaining_ms": state_durations[state] - time})
+    result = {"id": uuid, "intersection_id": intersection_id, "direction" : position, "state" : reported_state, "remaining_ms": state_durations[state] - time}
+    app.logger.debug(result)
+    return jsonify(result)
     # TODO: Update json file with new state and duration data
     #return Response(result, status=STATUS_OK, mimetype='application/json')
     
@@ -296,7 +298,7 @@ def register(uuid):
         traffic = json.load(json_file)
     
     if uuid not in traffic["light_map"]:
-        traffic["light_map"][uuid] = {"id" : uuid, "intersection_id": -1, "direction": "none", "state": 0, "remaining_ms": 5000}
+        traffic["light_map"][uuid] = {"id" : uuid, "intersection_id": -1, "direction": "none", "state": -2, "remaining_ms": 5000}
         
         with open(DIR_NAME + "/traffic.json", "w") as json_file:
             json.dump(traffic, json_file, indent=2)

@@ -306,7 +306,8 @@
             xhr.open("POST", "/setLightError", true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send(JSON.stringify({
-              "uuid": controller_id
+              "uuid": controller_id,
+              "state": -3
             }));
             xhr.onload = function() {
               if(xhr.status == 200) {
