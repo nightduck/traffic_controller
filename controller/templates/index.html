@@ -177,6 +177,7 @@
           </div>
         </div>
         <script>
+          var identified_id = "";
           function updateStreetLights() {
             var lights = document.getElementById("lights-switch").checked;
             var xhr = new XMLHttpRequest();
@@ -301,7 +302,10 @@
             }
           };
           function identifyController() {
-            var controller_id = document.getElementById("controller-select").value;
+            if (identified_id != "") {
+              unidentifyController(identified_id);
+            }
+            identified_id = document.getElementById("controller-select").value;
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/setLightError", true);
             xhr.setRequestHeader('Content-Type', 'application/json');
@@ -314,6 +318,23 @@
                 document.querySelector('.text-toast').innerHTML = "";
               } else {
                 document.querySelector('.text-toast').innerHTML = "Failed to identify controller\n" + xhr.response;
+                return;
+              }
+            }
+          }
+          function unidentifyController() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/setLightError", true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify({
+              "uuid": identified_id,
+              "state": 0
+            }));
+            xhr.onload = function() {
+              if(xhr.status == 200) {
+                document.querySelector('.text-toast').innerHTML = "";
+              } else {
+                document.querySelector('.text-toast').innerHTML = "Failed to reset identified controller\n" + xhr.response;
                 return;
               }
             }

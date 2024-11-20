@@ -201,11 +201,14 @@ def setLightError():
     with open(DIR_NAME + "/traffic.json", "r") as json_file:
         traffic = json.load(json_file)
         
-    # Find if there's another controller with state -1, and if so, set it to 0
-    # Its true state will be updated on the next call to getLightState
-    for other_uuid in traffic["light_map"]:
-        if traffic["light_map"][other_uuid]["state"] == -1:
-            traffic["light_map"][other_uuid]["state"] = 0
+    # # Find if there's another controller with state -3, and if so, set it to 0
+    # # Its true state will be updated on the next call to getLightState
+    # for other_uuid in traffic["light_map"]:
+    #     if traffic["light_map"][other_uuid]["state"] == request.json["state"]:
+    #         traffic["light_map"][other_uuid]["state"] = 0
+    
+    # TODO: If error is zero (resetting error), potentially set light to state -2 if it isn't
+    # assigned an intersection, otherwise set it to state 0
             
     # Check value of provided uuid
     uuid = request.json["uuid"]
@@ -242,6 +245,8 @@ def getLightState(uuid):
         traffic = json.load(json_file)
         if uuid not in traffic["light_map"]:
             return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
+        if traffic["light_map"][uuid]["intersection_id"] == -1:
+            return jsonify({"id": uuid, "intersection_id": -1, "direction": "none", "state": -2, "remaining_ms": 5000})
         if traffic["light_map"][uuid]["state"] < 0:
             # If light is in non standard state, return json object as-is
             return jsonify(traffic["light_map"][uuid])
@@ -324,7 +329,7 @@ def setLightLocation(uuid):
     
     # If so, lookup that controller and reset it to unassigned
     old_controller_uuid = intersection[direction]
-    if old_controller_uuid != "":
+    if old_controller_uuid != "" and old_controller_uuid in traffic["light_map"]:
         old_controller = traffic["light_map"][old_controller_uuid]
         old_controller["intersection_id"] = -1
         old_controller["state"] = 0
