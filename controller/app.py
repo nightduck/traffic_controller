@@ -302,8 +302,6 @@ def getLightState(uuid):
       traffic = json.load(json_file)
       if uuid not in traffic["light_map"]:
         return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
-      if traffic["light_map"][uuid]["intersection_id"] == -1:
-        return jsonify({"id": uuid, "intersection_id": -1, "direction": "none", "state": STATE_UNASSIGNED, "remaining_ms": 5000})
       if traffic["light_map"][uuid]["state"] < 0:
         # If light is in non standard state, return json object as-is
         return jsonify(traffic["light_map"][uuid])
