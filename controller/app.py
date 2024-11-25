@@ -7,6 +7,11 @@ from time import monotonic
 import os
 import sys
 import re
+from filelock import Timeout, FileLock
+
+STATE_CONNECTION_ERROR = -1
+STATE_UNASSIGNED = -2
+STATE_IDENTIFY = -3
 
 using_rpi = True
 try:
@@ -33,11 +38,15 @@ except ImportError:
             if pin not in self.states:
                 self.states[pin] = self.HIGH
             return self.states[pin]
-        def cleanup():
+        def cleanup(self):
             pass
     GPIO = GPIO_Fake()
 
 DIR_NAME = os.path.dirname(os.path.realpath(__file__))
+
+JSON_FILEPATH = DIR_NAME + "/traffic.json"
+LOCK_FILEPATH = DIR_NAME + "/traffic.json.lock"
+lock = FileLock(LOCK_FILEPATH)
 
 app = Flask(__name__)
 
@@ -117,15 +126,16 @@ def getLightIDs():
   unassigned = []
   assigned = []
   indicated = []
-  with open(DIR_NAME + "/traffic.json", "r") as json_file:
-      traffic = json.load(json_file)
-      for uuid in traffic["light_map"]:
-          if traffic["light_map"][uuid]["intersection_id"] == -1:
-              unassigned.append(uuid)
-          else:
-              assigned.append(uuid)
-          if traffic["light_map"][uuid]["state"] == -1:
-              indicated.append(uuid)
+  with lock:
+    with open(JSON_FILEPATH, "r") as json_file:
+        traffic = json.load(json_file)
+        for uuid in traffic["light_map"]:
+            if traffic["light_map"][uuid]["intersection_id"] == -1:
+                unassigned.append(uuid)
+            else:
+                assigned.append(uuid)
+            if traffic["light_map"][uuid]["state"] == STATE_IDENTIFY:
+                indicated.append(uuid)
       
   return jsonify({"unassigned": unassigned, "assigned": assigned, "indicated": indicated})
 
@@ -136,10 +146,11 @@ def getLightIDs():
 @app.route('/getIntersections', methods=['GET'])
 def getIntersections():
   intersections = []
-  with open(DIR_NAME + "/traffic.json", "r") as json_file:
-      traffic = json.load(json_file)
-      for intersection in traffic["intersections"]:
-          intersections.append(intersection["name"])
+  with lock:
+    with open(JSON_FILEPATH, "r") as json_file:
+        traffic = json.load(json_file)
+        for intersection in traffic["intersections"]:
+            intersections.append(intersection["name"])
       
   return jsonify(intersections)
 
@@ -151,31 +162,33 @@ def removeLightID():
     return Response("Missing uuid", status=ERROR_ARGUMENTS)
 
   # Read in traffic.json
-  with open(DIR_NAME + "/traffic.json", "r") as json_file:
-    traffic = json.load(json_file)
-    if request.json["uuid"] not in traffic["light_map"]:
-      return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
+  with lock:
+    with open(JSON_FILEPATH, "r") as json_file:
+      traffic = json.load(json_file)
+      if request.json["uuid"] not in traffic["light_map"]:
+        return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
 
-    # Remove ID from intersection
-    intersection_id = traffic["light_map"][request.json["uuid"]]["intersection_id"]
-    if intersection_id != -1:
-      intersection = traffic["intersections"][intersection_id]
-      if intersection["north"] == request.json["uuid"]:
-        intersection["north"] = ""
-      elif intersection["south"] == request.json["uuid"]:
-        intersection["south"] = ""
-      elif intersection["east"] == request.json["uuid"]:
-        intersection["east"] = ""
-      elif intersection["west"] == request.json["uuid"]:
-        intersection["west"] = ""
-      traffic["intersections"][intersection_id] = intersection
+      # Remove ID from intersection
+      intersection_id = traffic["light_map"][request.json["uuid"]]["intersection_id"]
+      if intersection_id != -1:
+        intersection = traffic["intersections"][intersection_id]
+        if intersection["north"] == request.json["uuid"]:
+          intersection["north"] = ""
+        elif intersection["south"] == request.json["uuid"]:
+          intersection["south"] = ""
+        elif intersection["east"] == request.json["uuid"]:
+          intersection["east"] = ""
+        elif intersection["west"] == request.json["uuid"]:
+          intersection["west"] = ""
+        traffic["intersections"][intersection_id] = intersection
 
     # Remove ID from light_map
     del traffic["light_map"][request.json["uuid"]]
     
   # Write back to traffic.json
-  with open(DIR_NAME + "/traffic.json", "w") as json_file:
-    json.dump(traffic, json_file, indent=2)
+  with lock:
+    with open(JSON_FILEPATH, "w") as json_file:
+      json.dump(traffic, json_file, indent=2)
     
   return Response("Success", status=STATUS_OK)
 
@@ -198,8 +211,9 @@ def setLightError():
     if "uuid" not in request.json:
         return Response("Missing uuid", status=ERROR_SERVER)
     
-    with open(DIR_NAME + "/traffic.json", "r") as json_file:
-        traffic = json.load(json_file)
+    with lock:
+      with open(JSON_FILEPATH, "r") as json_file:
+          traffic = json.load(json_file)
         
     # # Find if there's another controller with state -3, and if so, set it to 0
     # # Its true state will be updated on the next call to getLightState
@@ -217,10 +231,24 @@ def setLightError():
     if uuid not in traffic["light_map"]:
         return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
           
-    # Set state of provided uuid (if any) to -1
-    traffic["light_map"][uuid]["state"] = -1
+    # Set state of provided uuid to specified state, unless you're clearing the error and the 
+    # light is unassigned, in which case set it to unassigned error state
+    if request.json["state"] == 0 and traffic["light_map"][uuid]["intersection_id"] == -1:
+        traffic["light_map"][uuid]["state"] = STATE_UNASSIGNED
+    elif request.json["state"] == STATE_IDENTIFY:
+      # Reset all other lights to 0 (or unassigned, if appropriate). Only one light can be identifying at a time.
+      for other_uuid in traffic["light_map"]:
+        if traffic["light_map"][other_uuid]["state"] == STATE_IDENTIFY:
+          if traffic["light_map"][other_uuid]["intersection_id"] == -1:
+            traffic["light_map"][other_uuid]["state"] = STATE_UNASSIGNED
+          else:
+            traffic["light_map"][other_uuid]["state"] = 0
+      traffic["light_map"][uuid]["state"] = STATE_IDENTIFY
+    else:
+        traffic["light_map"][uuid]["state"] = request.json["state"]
     traffic["light_map"][uuid]["remaining_ms"] = 5000
-    with open(os.path.dirname(__file__) + "/traffic.json", "w") as json_file:
+    with lock:
+      with open(JSON_FILEPATH, "w") as json_file:
         json.dump(traffic, json_file, indent=2)
         
     return Response("Success", status=STATUS_OK)
@@ -241,15 +269,16 @@ def getLightState(uuid):
     # Calculate current state of uuid and return json object with info
     intersection = None
     traffic = None
-    with open(DIR_NAME + "/traffic.json", "r") as json_file:
+    with lock:
+      with open(DIR_NAME + "/traffic.json", "r") as json_file:
         traffic = json.load(json_file)
         if uuid not in traffic["light_map"]:
-            return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
+          return Response("ID not found in database", status=ERROR_UNKNOWN_ID)
         if traffic["light_map"][uuid]["intersection_id"] == -1:
-            return jsonify({"id": uuid, "intersection_id": -1, "direction": "none", "state": -2, "remaining_ms": 5000})
+          return jsonify({"id": uuid, "intersection_id": -1, "direction": "none", "state": STATE_UNASSIGNED, "remaining_ms": 5000})
         if traffic["light_map"][uuid]["state"] < 0:
-            # If light is in non standard state, return json object as-is
-            return jsonify(traffic["light_map"][uuid])
+          # If light is in non standard state, return json object as-is
+          return jsonify(traffic["light_map"][uuid])
         intersection_id = traffic["light_map"][uuid]["intersection_id"]
         intersection = traffic["intersections"][intersection_id]
         
@@ -299,13 +328,15 @@ def register(uuid):
     if not uuid_regex.match(uuid):
         return Response("UUID not correctly formatted", status=ERROR_ARGUMENTS)
     
-    with open(DIR_NAME + "/traffic.json", "r") as json_file:
+    with lock:
+      with open(DIR_NAME + "/traffic.json", "r") as json_file:
         traffic = json.load(json_file)
     
     if uuid not in traffic["light_map"]:
-        traffic["light_map"][uuid] = {"id" : uuid, "intersection_id": -1, "direction": "none", "state": -2, "remaining_ms": 5000}
+        traffic["light_map"][uuid] = {"id" : uuid, "intersection_id": -1, "direction": "none", "state": STATE_UNASSIGNED, "remaining_ms": 5000}
         
-        with open(DIR_NAME + "/traffic.json", "w") as json_file:
+        with lock:
+          with open(DIR_NAME + "/traffic.json", "w") as json_file:
             json.dump(traffic, json_file, indent=2)
         
     return Response("Success", status=STATUS_OK)
@@ -321,7 +352,8 @@ def setLightLocation(uuid):
     intersection_id = request.json["intersection_id"]
     direction = request.json["direction"]
     
-    with open(DIR_NAME + "/traffic.json", "r") as json_file:
+    with lock:
+      with open(DIR_NAME + "/traffic.json", "r") as json_file:
         traffic = json.load(json_file)
         
     # Lookup intersection to see if existing controller has been assigned to this location
@@ -349,7 +381,8 @@ def setLightLocation(uuid):
     controller["remaining_ms"] = 1000
     traffic["light_map"][uuid] = controller
         
-    with open(DIR_NAME + "/traffic.json", "w") as json_file:
+    with lock:
+      with open(DIR_NAME + "/traffic.json", "w") as json_file:
         json.dump(traffic, json_file, indent=2)
         
     return Response("Success", status=STATUS_OK)

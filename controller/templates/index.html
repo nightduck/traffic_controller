@@ -302,39 +302,25 @@
             }
           };
           function identifyController() {
-            if (identified_id != "") {
-              unidentifyController(identified_id);
+            if (document.getElementById("identify-switch").checked) {
+              state = -3;
+            } else {
+              state = 0;
             }
             identified_id = document.getElementById("controller-select").value;
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/setLightError", true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send(JSON.stringify({
-              "uuid": controller_id,
-              "state": -3
+              "uuid": identified_id,
+              "state": state,
+              "caller": "identifyController"
             }));
             xhr.onload = function() {
               if(xhr.status == 200) {
                 document.querySelector('.text-toast').innerHTML = "";
               } else {
                 document.querySelector('.text-toast').innerHTML = "Failed to identify controller\n" + xhr.response;
-                return;
-              }
-            }
-          }
-          function unidentifyController() {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/setLightError", true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.send(JSON.stringify({
-              "uuid": identified_id,
-              "state": 0
-            }));
-            xhr.onload = function() {
-              if(xhr.status == 200) {
-                document.querySelector('.text-toast').innerHTML = "";
-              } else {
-                document.querySelector('.text-toast').innerHTML = "Failed to reset identified controller\n" + xhr.response;
                 return;
               }
             }
