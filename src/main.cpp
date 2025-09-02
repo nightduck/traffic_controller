@@ -36,27 +36,28 @@ String intersection_location = "";
 Adafruit_NeoPixel auto_lights(AUTO_LED_COUNT, AUTO_LED_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel ped_lights(PED_LED_COUNT, PED_LED_PIN, NEO_GRB + NEO_KHZ800);
 
-// Turn on built-in LED and spam the UART with a message every couple seconds
-void set_error() {
-    while (true) {
-        Serial.println("Error");
-        digitalWrite(LED_BUILTIN, HIGH);
-        delay(1000);
-        digitalWrite(LED_BUILTIN, LOW);
-        delay(1000);
-    }
-}
+// // Turn on built-in LED and spam the UART with a message every couple seconds
+// void set_error() {
+//     while (true) {
+//         Serial.println("Error");
+//         digitalWrite(LED_BUILTIN, HIGH);
+//         delay(1000);
+//         digitalWrite(LED_BUILTIN, LOW);
+//         delay(1000);
+//     }
+// }
 
-void set_traffic_light(int addr, int state) {
-  Wire.beginTransmission(addr);
-  Wire.write(OUTPUT_REGISTER);
-  Wire.write(state);
-  Wire.endTransmission();
+// void set_traffic_light(int addr, int state) {
+//   Wire.beginTransmission(addr);
+//   Wire.write(OUTPUT_REGISTER);
+//   Wire.write(state);
+//   Wire.endTransmission();
 
-  Serial.print("0x");
-  Serial.println(state, HEX);
-}
+//   Serial.print("0x");
+//   Serial.println(state, HEX);
+// }
 
+// This accepts a negative number as a state, and blinks the lights accordingly
 int set_error_state(int state, int timeout = DEFAULT_BLINK_DURATION) {
   // Turn off pedestrian lights
   ped_lights.clear();
@@ -99,7 +100,8 @@ int set_error_state(int state, int timeout = DEFAULT_BLINK_DURATION) {
   return 0;
 }
 
-
+// This accepts a bitmask indicating which lights are which colors, and sends
+// the neopixel commands.
 void set_traffic_lights(int led_mask) {
   auto_lights.clear();
   ped_lights.clear();
@@ -168,6 +170,10 @@ void set_traffic_lights(int led_mask) {
 //     return interrupt_state;
 // }
 
+// This takes a state value (ideally positive), and either calls set_error_state
+// if the state is negative, or builds a bitmask to pass to set_traffic_lights.
+// It then enters a loop toggling any lights that are blinking and won't exit
+// until duration_ms has elapsed
 int enter_state(int state, int duration_ms, int interrupt_mask) {
   Serial.println("Entering state " + String(state) + " for " + String(duration_ms) + "ms");
   int led_mask, blink_mask, time = 0, interrupt_state = 0;
