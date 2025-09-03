@@ -12,6 +12,23 @@ The server script, `app.py` can be run standalone (useful for debugging), but wh
     python -m pip install -r requirements.txt   # First install prereqs
     ./install_controlhub.sh     # Install controlhub as server and set it to start on bootup
 
+## Debugging
+
+The current status of the server and a recent text dump of its logs can be found with the following command
+
+    sudo systemctl status traffic_controller.service
+
+The server can also be rebooted with
+
+    sudo systemctl restart traffic_controller.service
+
+To stop the server (for debugging purposes), use the following command
+
+    sudo systemctl stop traffic_controller.service
+
+Or, if you want to prevent the server from restarting on reboot, disable it
+
+    sudo systemctl disable traffic_controller.service
 
 ## Webpage
 
